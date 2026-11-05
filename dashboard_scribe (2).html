@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SCRIBE · Dashboard comercial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --magenta:#E3256B; --ceruleo:#1CA9C9; --violeta:#7B57A8; --verde:#1F9E7A; --naranja:#FF8A3D;
+  --ink:#101820; --bg:#E9ECF0; --card:#FFFFFF;
+  --muted:#5C6672; --line:#DCE1E8; --soft:#F3F5F8;
+  --pos:#1F9E7A; --neg:#E3256B;
+  --disp:'Archivo','Archivo Black','Helvetica Neue',Arial,sans-serif;
+  --body:'Inter','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:'IBM Plex Mono','SFMono-Regular',Consolas,'Liberation Mono',monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---------- cabecera ---------- */
+.stripe{height:7px;display:flex}
+.stripe i{flex:1}
+.stripe i:nth-child(1){background:var(--magenta)}
+.stripe i:nth-child(2){background:var(--ceruleo)}
+.stripe i:nth-child(3){background:var(--violeta)}
+.stripe i:nth-child(4){background:var(--verde)}
+.stripe i:nth-child(5){background:var(--naranja)}
+header{position:sticky;top:0;z-index:50;background:var(--card);border-bottom:1px solid var(--line);box-shadow:0 1px 10px rgba(16,24,32,.06)}
+.hrow{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:12px 22px 10px}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.brand h1{font-family:var(--disp);font-weight:800;font-size:26px;letter-spacing:-.02em;margin:0;line-height:1}
+.brand .sub{font-size:12px;color:var(--muted);letter-spacing:.02em}
+.cut{font-family:var(--mono);font-size:11.5px;color:var(--muted);background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:4px 11px;white-space:nowrap}
+.filters{margin-left:auto;display:flex;gap:14px;flex-wrap:wrap}
+.fld{display:flex;flex-direction:column;gap:3px}
+.fld label{font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600}
+select{font-family:var(--body);font-size:12.5px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 26px 6px 10px;min-width:150px;
+  appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0h10L5 6z' fill='%235C6672'/></svg>");
+  background-repeat:no-repeat;background-position:right 9px center;cursor:pointer}
+select:focus-visible,button:focus-visible{outline:2px solid var(--ceruleo);outline-offset:2px}
+select:disabled{opacity:.42;cursor:not-allowed}
+.fld.off label{opacity:.5}
+nav{display:flex;gap:2px;padding:0 16px;overflow-x:auto}
+nav button{font-family:var(--body);font-size:13px;font-weight:600;color:var(--muted);background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;cursor:pointer;white-space:nowrap}
+nav button:hover{color:var(--ink)}
+nav button.on{color:var(--ink);border-bottom-color:var(--magenta)}
+
+/* ---------- layout ---------- */
+main{padding:20px 22px 60px;max-width:1560px;margin:0 auto}
+.panel{display:none}
+.panel.on{display:block}
+.grid{display:grid;gap:14px;margin-bottom:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g23{grid-template-columns:1.35fr 1fr}
+.stack{display:flex;flex-direction:column;gap:14px;min-width:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;min-width:0}
+.card h2{font-family:var(--disp);font-weight:700;font-size:14.5px;letter-spacing:-.01em;margin:0 0 2px}
+.card .hint{font-size:11.5px;color:var(--muted);margin:0 0 12px}
+.chead{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.chead .hint{margin:0}
+
+/* ---------- kpi ---------- */
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px 15px;position:relative;overflow:hidden;min-width:0}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--k,var(--magenta))}
+.kpi .lab{font-size:9.5px;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);font-weight:600}
+.kpi .val{font-family:var(--disp);font-weight:700;font-size:27px;letter-spacing:-.02em;line-height:1.12;margin-top:5px;font-variant-numeric:tabular-nums}
+.kpi .val small{font-size:15px;font-weight:600;color:var(--muted);letter-spacing:0}
+.kpi .foot{font-size:11.5px;color:var(--muted);margin-top:5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;white-space:nowrap}
+.chip.up{background:rgba(31,158,122,.12);color:#177A5E}
+.chip.dn{background:rgba(227,37,107,.11);color:#C01B58}
+.chip.nt{background:var(--soft);color:var(--muted)}
+
+/* ---------- tablas ---------- */
+.tw{overflow-x:auto;margin:0 -4px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;text-align:right;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th.l,td.l{text-align:left}
+td{padding:6px 8px;border-bottom:1px solid var(--soft);text-align:right;white-space:nowrap}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums}
+tbody tr:hover{background:var(--soft)}
+tbody tr:last-child td{border-bottom:0}
+tr.tot td{border-top:1.5px solid var(--line);font-weight:700;background:var(--soft)}
+td.name{white-space:normal;line-height:1.25;max-width:280px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:7px;vertical-align:1px}
+.mini{font-size:10.5px;color:var(--muted)}
+.pill{font-size:10px;font-weight:600;background:var(--soft);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--muted)}
+.bar-cell{position:relative}
+.bar-cell i{position:absolute;left:8px;top:50%;transform:translateY(-50%);height:7px;border-radius:2px;opacity:.28}
+.bar-cell span{position:relative}
+
+/* ---------- controles ---------- */
+.seg{display:flex;gap:0;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--soft)}
+.seg button{font-family:var(--body);font-size:11.5px;font-weight:600;color:var(--muted);background:none;border:0;padding:6px 12px;cursor:pointer;white-space:nowrap}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(16,24,32,.12)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:8px}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{font-family:var(--body)}
+svg text.n{font-family:var(--mono)}
+.mline{stroke:var(--line);stroke-width:1}
+.empty{color:var(--muted);font-size:12.5px;padding:14px 2px}
+
+/* ---------- responsive ---------- */
+@media (max-width:1180px){ .g4{grid-template-columns:repeat(2,1fr)} .g23{grid-template-columns:1fr} }
+@media (max-width:900px){ .g3,.g2{grid-template-columns:1fr} main{padding:16px 12px 50px} .hrow{padding:12px 14px 10px} .filters{margin-left:0;width:100%} select{min-width:0;width:100%} .fld{flex:1} }
+@media (max-width:560px){ .g4{grid-template-columns:1fr} .brand h1{font-size:22px} }
+
+/* ---------- impresión ---------- */
+@media print{
+  body{background:#fff}
+  header{position:static;box-shadow:none}
+  nav,.filters{display:none}
+  .panel{display:block!important;page-break-before:always}
+  .panel:first-of-type{page-break-before:auto}
+  .card{break-inside:avoid;box-shadow:none}
+  .panel::before{content:attr(data-title);display:block;font-family:var(--disp);font-weight:700;font-size:18px;margin:8px 0 12px}
+}
+</style>
+</head>
+<body>
+<div class="stripe"><i></i><i></i><i></i><i></i><i></i></div>
+<header>
+  <div class="hrow">
+    <div class="brand">
+      <h1>SCRIBE</h1>
+      <span class="sub">Dashboard comercial · Khatar</span>
+    </div>
+    <span class="cut" id="cutLabel"></span>
+    <div class="filters">
+      <div class="fld"><label for="fCanal">Canal</label><select id="fCanal"></select></div>
+      <div class="fld"><label for="fZona">Zona</label><select id="fZona"></select></div>
+    </div>
+  </div>
+  <nav id="tabs">
+    <button class="on" data-t="resumen">Resumen ejecutivo</button>
+    <button data-t="ventas">Ventas y tendencia</button>
+    <button data-t="productos">Productos</button>
+    <button data-t="clientes">Clientes y canal</button>
+    <button data-t="cierre">Cierre mensual</button>
+    <button data-t="sellout">Sell out Tottus</button>
+    <button data-t="rotacion">Rotación y stock</button>
+  </nav>
+</header>
+<main>
+  <section class="panel on" id="p-resumen" data-title="Resumen ejecutivo"></section>
+  <section class="panel" id="p-ventas" data-title="Ventas y tendencia"></section>
+  <section class="panel" id="p-productos" data-title="Productos"></section>
+  <section class="panel" id="p-clientes" data-title="Clientes y canal"></section>
+  <section class="panel" id="p-cierre" data-title="Cierre mensual"></section>
+  <section class="panel" id="p-sellout" data-title="Sell out Tottus"></section>
+  <section class="panel" id="p-rotacion" data-title="Rotación y stock"></section>
+</main>
+<script id="DATA" type="application/json">{"brand":"SCRIBE","catc":["#E3256B","#1CA9C9","#7B57A8","#45617D","#FF8A3D","#1F9E7A"],"cut":"2026-10-30","base":"2024-01-01","cat":["Cuadernos","Lápices de colores","Marcadores","Exhibidores PDQ","Resaltadores","Lápiz grafito"],"cli":["IMPORTADORA RYA LTDA.","COMERCIAL MELQUISEDEC LIMITADA","HIPERMERCADOS TOTTUS S.A","IMP. EXP. Y COM. DAVID GOMEZ EIRL","TIENDAS KAYMA SPA","FELIPE SAMUEL MERY ROZAS","F Y P INVERSIONES SPA","RAFAEL ARAYA","COMERCIAL TOP VENTA LTDA.","LIBRERIA ANTU LTDA.","SOCIEDAD COMERCIAL LOS ITALIANOS LTDA","TIENDA LIMON TALCA SPA","ESPOL S.A./LAUTARO","DISTRIBUIDORA Y VENTAS CARLOS GONZALES","DISTRIBUIDORA LA GOMITA LIMITADA","PSELI NAVARRETE E HIJOS LIMITADA","COMERCIAL KAIROS SPA","EDUARDO RIQUELME GUTIERREZ IMPORTADORA","DISTRIBUIDORA ALBERTO CORREA EIRL","EL DATO BARATO SPA","SOCIEDAD IBACETA SPA","COMERCIAL EXPRESS LTDA","DISUMOFI LTDA","ERWIN HAENSGEN ANDREWARTHA","COMERCIAL TRICAHUE SPA","JORGE RODRIGO FUENTES GARCES","SOCIEDAD COMERCIAL SAZARTT LIMITADA","MARIA ANGEL ELIZABETH CID VALLAGRA","SOCIEDAD COMERCIAL CAMILO Y COMPAÑIA","VERA Y CIA. LTDA","JAVIER ALEXIS FIGUEROA ACUÑA","DISTRIBUIDORA ELIM SPA","ALBERTO MOISES REGLA CAMPOS","MAURICIO DIAZ ROA","TIMBRES E IMPRESOS ADIMEL LTDA.","LORENA ARIAS SAEZ","MINIMARKET ANGELICA ORTIZ MARDONEZ","COMERCIAL REDLICH GARCIA SPA","EDUARDO SALINAS NAIM","PAULA ISIDORA ALVARADO PEREZ","CRISTIAN ELFERNAN PRADO","LIBRERIA LA IDEAL SPA","SUMINISTROS PRINT SPA.","LUIS ACUÑA LUCAY SPA","EDUARDO RIQUELMEGUTIERREZ IMPORTADORA","COMERCIAL H Y D SPA","SOC COMERCIAL LIBRERIA IQUIQUE SPA","FREDY CARRERO SALVO","LIBRERIA Y PAPELERIA COLOR PAPER SPA","SOC. COM. Y DIST. AMERICA LTDA.","MULTITIENDAS EDUSS EIRL","PEDRO ANTONIO DIAZ CASTRO","MILOS SPA","BARRIOS Y TAPIA LTDA","WALTERIO ACUÑA Y COMPAÑIA LIMITADA","IMPORTADORA Y DISTRIBUIDORA PINOCHO","LAURENT MARIE JEAN-LUC LHERITIER","JULIA ZACARIAS SILVA","GELCOM SPA","LIBRERIA BIG PEN SPA","YOSELEN MARBEL NAVARRETE PEREIRA","DISTRIBUIDORA Y COMERCIALIZADORA SHALOM","SOCIEDAD COMERCIAL VERCON SPA","ROSAURA OLIVARES CESPEDES","INSUMOS Y LIBRERIA DIGITAL SPA","MIGUEL ANGEL QUISPE CONDORI","REYSCALLAH NASER Y HERMANOS SPA","ERIKA MAGALY ESPINOZA MORA","COMERCIAL LOS INCAS LTDA","COMER. Y DIST. EMA ARACENA EIRL","COMERCIAL LILY LIMITADA","COMERCIALIZADORA DANIELA ORTIZ E.I.R.L.","MARIA ARMELLA LOPEZ","COMERCIAL PAPELAPIZ SPA","LIBRERIA LEONEL ANTONIO CID SUAZO EIRL","NOVEDADES ROMERA SPA","LIBRERIA AYG","REYES Y HEREDIA LTDA.","PATRICIO DARWIN ALEJANDRO FUENTES JARA","TIENDA LIMON SPA","BETSABE FLORES NIETO","LUCILA CORDOVA SANCHEZ","LAC ESTUDIO SPA","COMERCIAL Y DISTRIBUIDORA KIMUN SPA","CAROLINA ALEJANDRA RODRIGUEZ","LIBRERIA TOVI SPA","ROSA ELVIRA MUÑOZ NINA","COMERCIAL PARANAL SPA","LIBRERIA EL OSO","COMERCIALIZADORA Y DISTRIBUIDORA PORTO","MARTA CARRASCO LARA","COMERCIALIZADORA DIRECTO CHILE LTDA","COMERCIAL N Y R LTDA.","SOC.COMERCIAL KIKA LIMITADA","LA LIBRERIA SPA","SAN MARTIN EMPARAN MARJORIE","SOCIEDAD COMERCIAL LIBROS PATAGONIA SPA","JIMENA JOSEFINA ASTORGA SANTORO","SOC COMERCIALIZADORA ECOLIFE SPA","GLORIA DIAZ DOTE E.I.R.L.","FARUK JORGE MISLEH CARDOCH","ROSA NOEMI CAÑETE BAEZA","LIBRERIA 81 SPA","SOCIEDAD CONTRERAS LTDA.","ALEX OSMEY LOPEZ ARAYA","MARIO CEPEDA PALMA","ANGELICA NOVOA Y CIA LTDA.","LIBRERIA ESTRELLITA ISLA TEJA SPA","SOCIEDAD COMERCIAL CUELLAR ARAYA E HIJAS","SOCIEDAD COMERCIAL ROGEL PEREZ LEON","PEDRO JOSE VALENZUELA MORENO","COMERCIAL GLADYS AGUILLON RUEDAS E.I.R.L","MARIA MERCEDES ARIAS ORELLANA","SOCIEDAD COMERCIAL LAPIZ BLUE SPA","MARIA LABRA LOAIZA","REINER MALVERDE CARRASCO","LIBRERIA Y PAPELERIA DELTA LTDA.","COMERCIAL RICHARD VIDAL LIMITADA","COMERCIO COPAO VENTAS LIMITADA","CESAR ALEJANDRO JAQUE LARA","SOCIEDAD COMERCIAL MARIA ROJAS E HIJAS","DISTRIBUIDORA CLEE LTDA.","MYH LTDA","JUAN RAASH Y CIA. LTDA.","ORTIZ Y VALLEJOS LTDA.","COMERCIALIZADORA ELSA NOFAL EIRL","SOCIEDAD LA ACADEMIA LTDA","KARIN KLETT DIEZ","MARIO ENRIQUE HENRIQUEZ HASBUN","ELBA LUZ LUCAY DONOSO","SOC COM MULTIGRAFICA H G A L","LIBRERIA ROBERTO NASER","NOVEDADES ROMERAL SPA","PAPELERIA Y MANUALIDADES CRAFT SPA","GONZALEZ CASTILLO RENE EVARISTO","LUIS EDUARDO RIQUELME CHACON","NIVALDO PINO FARIAS","COMERCIAL MISS PAPER SPA","INVERSIONES E INMOBILARIA CESAR SOTO","AROMATIZATE SERVICIOS INTEGRALES DE","BELLESPA SPA","ISABEL FLORES MAMANI","REGALOS BETYCEL SPA","JULIO JIMENEZ","MACARENA MOYA","MIGUEL ZAMORANO GALLARDO","GLORIA SAAVEDRA","KIMBERLY MORAGA VALDIVIA","MIGUEL MARIN","JACQUELINE ASTORGA","MARIA ARAYA TORRES","VICTOR HERNANDEZ","BRAYAN URRA","NICOLAS PAREDES","COMERCIALIZADORA AMERICA SPA","ESPOL S.A","PATRICIA INELDA RODRIGUEZ BARRAZA"],"can":["Librerías","Mayoreo","Moderno (Tottus)","Ruteo","Supermercados Regionales","Venta al Personal","Distribuidores"],"zon":["Región Metropolitana","VIII · Biobío","VII · Maule","IX · Araucanía","IV · Coquimbo","I · Tarapacá","II · Antofagasta","V · Valparaíso","III · Atacama","X · Los Lagos","VI · O’Higgins","XII · Magallanes"],"ven":["Mavialis Quintana","Erick Chavez","Fernando Leiva","Miguel Marin","Hector Flores","Cristian Vallejos","Luis Miranda","Mauricio Navarro","Oficina"],"pn":["CUA.COLLEGE LISO 7MM 100H SCR DS/10","CUA.COLLEGE LISO 7MM 80H SCR DS/10","CUA.UNIV GRAN FEM 7MM 150H INCOL SC DS/4","CUA.UNIV GRAN MASC 7MM 150H SCR G DS/4","PR LATERAL 1/8 PALLET READY SCRIBE 2026","LAPC.SCRIBE 1 PTA.JUMBO TRIANGULAR DS/12","LAPC.SCR.DOBLE PUNTA TRIANGULAR DS/24","PLUMON SCRIBE PUNTA GRUESA DS/12","LAPC.SCRIBE 1 PTA.COLORES PRO DS/15","LAPC.SCRIBE 1 PTA.TRIANGULAR DS/12","CUA UNIV MASC 7MM 100H SCR DS/10","CUA.UNIV FEM 7MM 100H INCOLORS SCR DS/10","LAPC.SCRIBE 1 PTA.TRIANGULAR DS/24","LAPC.SCRIBE DOBLE PUNTA TRIANG. DS/12","PLUMON SCRIBE PUNTA DELGADA DS/12","LAPC.SCRIBE 1 PTA.TRIANG.INCOLOR DS/15","CUA UNIV MASC 7MM 100H EGS SCR DS/10","CUAD.UNIV UNI C.7MM EDG 100H SCRIBE 36PZ","CUAD UNIV FEM 7MM 100H SCR DS/10","CUA.UNIV GRAN FEM 7MM 120H INCO SCR DS/4","CUA.UNIV GRAN MASC 7MM 120H SCR G DS/4","CUAD.UNIV FEM C.7MM EDG 100H HUELLITAS 3","RESALTADOR U.PUNTA SCRIBE AMAR 10PZA 20U","CUA.UNIV MED FEM 7MM 120H INCOL SCR DS/4","CUAD.UNIV MASC C7MM EDG 100H INBLACK 36P","RESALTADOR UNIPUNTA INCOLORS 10PZA 48U","CUA.UNIV MED MASC 7MM 120H SCR DS/4","COLOR U.PUNTA REDOND SCRIBEPRO 30PZA 24U","CUAD.UNIV FEM C.7MM EDG 100H INCOLORS 36","CUAD.UNIV FEM MPD C7MM 120H INCOLORS30PZ","LAPC.SCRI.DOBLE PUNTA TRIANG INCOL.DS/15","CUAD.UNIV MAS MPD C7MM 120H TRIBALS 30PZ","RESALT U.PUNTA PASTEL INCOLORS 6PZA 48U","CUAD.UNIV MASC C7MM EDG 100H MASTER 36PZ","LAPIZ GRAFITO SCRIBE JUMBO 10PZA 20UN","COLOR DOBLEPUNTA INCOLORS NEW 15PZA 48U","COLORES UNIPUNTA INCOLORS NEW 15PZA 48U","LAPIZ GRAFITO SCRIBE CAJA 12PZA 120UN","RESALT UNIPUNTA BLISTER SCRIBE 5PZA 24U","PLUMON UPUNTA RED DELGA SCRIBE 24PZA 48U","COLORES UNIPUNTA SCRIBE 18COLX48UN","COLLEGE LISO 7MM 80H SCRIBE DS 5","LAPIZ GRAFITO SCRIBE BLISTER 3PZA 36UN","CUAD.UNIV MAS GPD C.7MM 120H TRIBALS 30P","RESALTADOR U.PUNTA SCRIBE VERDE 10PZA20U","CUAD.UNIV FEM GPD C7MM 120H INCOLORS30PZ","LAPC.UNIPUNTA HEXAG SCRIB 24 COLORES U/E"],"pc":[0,0,0,0,3,1,1,2,1,1,0,0,1,1,2,1,0,0,0,0,0,0,4,0,0,4,0,1,0,0,1,0,4,0,5,1,1,5,4,2,1,0,5,0,4,0,1],"ps":[6555,13365,2533,2501,0,738,4422,5800,4184,21298,2675,2590,754,403,4856,5462,825,810,1038,6450,6658,180,1352,6791,399,6775,6990,2003,1155,1320,0,1312,6632,939,1526,1579,2389,0,3362,10544,3645,26496,970,1802,3498,1702,1927],"px":[5648,5153,6905,6905,313218,1831,2685,1005,1668,939,10276,10276,1838,1154,690,1430,9248,5071,9248,5302,5302,5071,1583,4521,5071,2832,4521,3167,5071,5823,1685,5823,944,5071,1045,1675,1421,477,873,1380,1116,2577,274,6854,1583,6854,1827],"n":3106,"D":"9x,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,a,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,2,0,1,0,0,1,0,0,0,0,0,3,0,0,2,0,0,0,5,0,0,0,0,0,0,0,3,0,0,1,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,6,0,0,0,0,0,0,0,6,0,0,0,0,0,6,0,0,0,1,6,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,3,0,0,0,0,4,0,0,0,0,0,1,2,0,0,0,0,6,0,0,b,0,0,0,0,0,0,0,0,a,6,7,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,1,a,2,0,0,0,0,0,1,0,0,0,0,0,6,5,0,0,0,0,2,0,0,0,0,5,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,5,0,0,0,3,5,0,0,0,0,1,0,0,k,0,0,0,0,0,0,0,1,0,0,4,0,0,0,0,0,1,0,0,0,0,0,0,0,f,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,3,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,5,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,5,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,2,0,0,0,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,1,1,0,3,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,3,0,0,0,0,0,0,0,0,2,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,3,0,0,3,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,8,0,0,6,0,0,0,0,0,0,0,5,2,0,0,0,5,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,b,0,0,3,0,0,0,0,0,c,0,1,0,1,1,0,0,0,a,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,9,o,0,0,0,0,0,7,0,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,c,0,0,1,0,7,1,0,5,1,0,1,0,0,0,0,0,3,7,0,0,8,1,0,0,0,0,0,f,0,d,0,0,0,0,5,0,1,1,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0","C":"1h,1h,1h,1h,1h,1h,1h,1h,1h,1h,28,28,28,28,28,28,28,2c,2c,2c,2c,2c,2c,3a,3a,3a,3a,v,v,v,v,v,v,v,v,v,v,v,v,v,3l,u,u,u,u,u,u,u,2m,2m,2m,2m,2m,2m,2m,2m,2m,2m,2x,2x,2x,2x,4c,4c,4c,4c,1r,1r,1r,1r,1r,1r,1r,1r,1r,1r,1r,1r,1r,1r,1r,1r,1r,1r,1r,1r,2v,2v,2v,2v,2v,2v,1o,1o,1o,1o,1o,1o,1o,1o,1o,e,e,b,b,b,b,b,b,b,b,b,b,1o,1o,1o,1o,1o,1o,1o,1o,1o,m,m,m,m,m,m,m,m,m,m,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,27,27,27,27,27,27,27,27,27,27,b,b,b,b,b,b,b,b,b,b,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,2r,2r,2r,2r,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,t,t,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,b,b,b,b,b,b,b,b,b,b,9,9,9,9,9,9,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,y,y,y,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,13,13,13,13,13,13,9,9,9,9,9,9,13,13,13,13,13,13,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,13,13,13,13,13,13,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1b,1b,1b,1b,1b,1b,1b,4c,4c,4c,4c,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,28,v,1c,1c,1c,1c,1c,1c,1c,1c,1c,1c,1c,1c,1c,1c,1c,2l,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,1h,1h,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,1x,1x,1x,1x,1x,1x,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,1v,1v,1v,1v,1v,1v,1v,1v,1v,1v,1v,1v,1v,1v,1v,1v,0,0,0,0,0,0,0,0,0,0,37,37,37,37,37,37,w,w,w,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,9,9,9,9,9,9,9,9,15,u,u,u,u,9,46,46,46,46,46,46,46,46,2t,2t,2t,2t,2t,2t,2t,2t,2t,a,3i,d,d,d,d,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,b,b,b,b,b,b,b,b,b,b,p,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,3c,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,i,i,i,i,i,i,43,43,43,43,43,b,b,3z,3z,3z,3z,3z,3z,3z,44,44,48,48,48,3b,3b,3b,1,1,1,1,1,1,e,e,e,e,e,d,d,d,d,d,d,d,d,0,0,p,40,40,40,40,40,40,40,q,q,q,q,q,1u,m,m,m,2s,2s,2s,2s,2s,p,22,22,22,22,22,22,22,22,22,22,22,22,3r,3r,3r,3r,3r,1t,1t,1t,1t,1t,1t,3m,3m,3m,3m,3m,3m,3m,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,3l,3l,3l,3l,3l,3l,3,3,3,3,p,26,k,1,1,2s,49,49,f,f,f,47,47,47,2s,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,p,p,v,v,12,12,12,12,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,3,3,k,1,1,p,9,46,21,i,i,3w,1n,1n,13,13,13,13,13,1u,a,a,a,a,a,a,a,a,a,a,a,a,a,g,g,g,g,g,2n,2n,2n,2n,2n,2n,2n,2n,2n,2n,2n,2n,2n,2n,2n,2n,i,5,5,1b,1b,1b,1b,1u,1u,b,b,15,15,16,42,42,42,42,42,42,i,i,i,2h,2h,2h,2h,32,32,32,32,32,32,32,32,q,q,q,8,8,8,y,38,38,38,38,10,10,10,10,10,1i,1i,1i,1i,1i,1i,1i,1i,1i,1i,1i,1i,o,o,o,o,o,o,o,o,o,o,3g,3g,3n,26,26,26,s,s,s,s,s,s,s,s,m,m,f,f,f,f,2k,2k,2k,2k,q,3p,3p,3p,3p,3p,3l,3l,3l,3l,3l,3l,17,17,17,17,17,17,z,z,z,z,z,z,z,z,z,z,z,46,46,46,46,46,46,46,35,35,35,35,35,2y,2y,2y,2y,v,v,3d,u,u,u,u,u,f,f,y,1z,1z,1z,1z,1z,1z,1z,1z,1z,q,13,33,33,33,33,33,33,33,33,e,e,e,n,n,n,n,n,n,n,12,q,e,e,26,26,26,26,3b,3b,3b,3b,f,b,3n,2k,2k,36,36,36,30,30,30,30,30,1j,1j,r,r,r,r,r,r,r,r,r,r,r,r,r,r,41,11,11,11,11,2d,2d,2i,2i,2i,2i,42,3d,3d,3d,3u,3u,z,z,z,1q,1q,1q,1q,1q,1q,1q,1q,1z,1z,1z,1g,1g,1g,1g,1g,1g,n,n,n,n,n,n,n,n,n,n,5,1j,1j,1j,1j,1j,1j,1j,1j,1j,1j,1j,r,r,r,r,r,r,r,r,3,3,28,28,28,28,28,28,28,31,31,31,31,31,31,31,31,e,e,e,e,e,e,e,e,e,12,12,12,12,12,12,3k,3k,3k,3k,3k,3k,3k,3k,3k,3k,3k,3k,x,x,x,x,x,x,x,x,x,x,s,s,s,s,s,s,s,s,s,s,s,s,s,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,1w,39,39,39,39,39,39,39,39,39,39,39,39,39,39,39,39,39,39,39,39,39,39,39,39,3j,3j,3j,3j,3j,3j,3j,3j,2a,2a,2a,2a,2a,2a,2a,2a,2a,2a,24,24,r,r,3g,3g,3g,3g,3g,3g,3g,3g,1d,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,2z,2z,2z,2z,2z,2z,2z,2z,2z,2z,2z,2z,2z,2z,10,10,10,10,10,10,10,10,1z,1z,1z,1z,1z,1z,1z,1z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,1t,1t,1t,1t,1t,1t,1t,1t,1g,1g,1g,1g,1d,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,18,18,18,18,18,18,18,18,18,18,18,18,r,r,r,r,r,r,r,r,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,a,a,a,a,a,a,a,a,a,a,a,o,o,o,o,o,o,o,o,45,45,3f,3f,3f,3f,3f,3f,3f,3f,3f,y,y,y,y,y,y,y,y,y,y,y,y,1h,1h,1h,1h,1h,1h,1h,2j,2j,2j,2j,2j,2j,2j,2j,20,20,20,20,20,20,20,20,20,1e,1e,1e,1e,1e,1e,1e,1e,1e,1e,1e,f,f,f,f,f,f,2e,2e,2e,2e,2e,2e,2e,2e,2e,2e,2e,2e,2e,2e,1r,1r,1r,1r,1r,1r,1r,1i,1i,1i,1i,1i,1i,1i,1i,1i,2j,2j,2j,2j,f,v,4b,4b,4b,4b,4b,4b,1a,1a,1a,1a,1a,1s,1s,1s,1s,1s,1s,1s,1s,1s,1s,1s,2i,2i,1a,1a,1a,1a,1a,1a,1a,o,o,o,1d,36,36,36,36,36,36,36,36,4b,4b,4b,4b,4b,4b,c,c,c,c,c,c,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3x,1l,1l,1l,1l,1l,1l,2u,2u,2u,2u,2u,2u,2u,2u,2d,2d,13,13,13,13,13,13,13,13,13,16,16,2c,2c,2c,2c,15,15,15,15,15,15,1f,1f,1f,1f,16,b,b,b,b,b,b,b,b,b,b,b,b,b,b,b,b,b,b,b,b,b,b,b,b,b,b,1h,1h,v,v,v,v,1b,1b,1b,1b,1b,1b,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1l,1l,1l,1l,1l,1k,1k,1k,1k,1k,1k,1k,2u,2u,2u,2u,15,15,15,15,15,15,15,17,17,20,20,20,13,13,13,2e,1r,1r,1a,a,1p,2a,2a,2a,1t,1t,1t,1t,1t,1t,1t,k,k,k,k,k,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,1y,1y,1y,1y,1y,1y,1y,2j,2j,2j,2j,2j,2j,2j,2j,2j,n,n,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,3,3,f,f,f,f,f,f,f,f,f,f,f,f,7,7,7,7,7,7,7,7,2j,a,k,k,2h,2h,2h,2h,3s,c,24,24,s,s,s,s,s,s,s,s,s,s,s,s,s,s,q,q,q,q,q,q,q,q,q,q,q,q,q,q,q,q,b,b,b,b,b,b,b,b,b,b,b,b,b,b,b,b,0,0,0,0,1x,1x,1x,1x,1x,1x,1x,1x,1x,1x,j,j,j,j,3,9,1n,1n,13,2q,q,1m,0,0,3h,3h,3h,3h,3h,3h,3h,3e,3e,3e,3e,3e,3e,3e,3e,3e,3e,3e,3e,3e,3e,3e,1k,1k,1k,2w,2w,2w,2w,2w,2w,2w,2w,2w,2w,2w,2w,2w,2h,2h,2h,2r,2r,2m,2m,2m,2m,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,d,d,d,d,d,d,d,d,d,d,1f,1f,1i,1i,1i,1i,1i,1i,1i,1i,1i,1i,1i,1i,j,j,j,j,j,j,j,j,j,j,x,x,x,x,x,x,x,x,x,x,x,x,14,5,5,5,5,5,5,5,5,5,5,1n,1n,33,33,33,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,c,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,16,16,2p,2p,2p,2p,2p,2p,2p,2p,2p,2p,2p,2p,2p,2p,2p,2p,2p,2p,2p,2p,30,30,30,30,30,30,30,30,30,30,30,30,30,30,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,8,8,e,e,e,e,e,e,e,e,e,e,3y,3y,3y,3y,3y,3y,1k,1k,1k,22,22,22,22,22,22,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,j,j,j,j,3t,3t,3t,3t,12,12,12,12,12,12,12,12,12,12,12,12,12,x,x,x,x,f,f,f,f,1n,1n,1n,1n,1n,10,10,10,10,10,10,10,10,8,8,8,8,8,8,8,8,8,8,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,8,8,8,8,24,2l,2l,2q,2q,2q,2q,h,p,p,p,p,2l,2l,2l,2l,2l,2l,y,y,y,y,y,w,w,w,w,w,w,8,8,2d,2d,e,e,e,e,e,e,3,3,3,3,1k,1k,1k,17,17,17,k,28,28,28,28,28,28,4a,4a,4a,4a,2h,2h,2h,2h,2s,2w,2w,24,14,w,w,w,w,w,w,2q,2q,2q,4a,4a,e,e,e,q,2h,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,z,2n,2n,23,23,23,23,23,23,23,23,z,z,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,15,15,15,15,15,15,15,15,3q,3q,3q,2y,2y,2y,2y,z,z,g,g,g,g,26,26,26,26,26,26,26,26,f,f,2t,2t,2t,u,u,u,u,u,u,u,u,3v,w,2h,e,e,12,12,12,12,12,12,12,12,1y,1y,1y,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,16,16,16,16,16,23,t,t,w,w,w,w,w,w,3k,3k,1q,1q,24,2c,2c,2c,2c,1i,1i,1i,1i,1i,2z,2z,2z,2z,2z,2z,2z,2z,2z,2z,2z,2z,2z,1z,1z,1z,1z,1z,1z,1z,1z,1z,1z,1z,1z,2k,2k,2k,2k,2k,2k,2k,2k,2k,2k,2k,2k,2k,2k,2k,2k,2k,2k,2k,2k,2k,2k,s,s,s,s,s,s,s,s,s,s,s,s,2o,2o,2o,2o,2o,2o,2o,13,13,13,13,b,26,26,26,26,26,26,2b,2b,1s,1y,1y,2f,2f,2f,2f,2f,2f,2f,2f,2f,2f,2f,2f,2f,2f,10,10,10,10,10,10,10,10,16,16,2g,2g,2g,2t,2t,2f,2,2,i,i,i,i,i,i,i,i,i,1y,2d,2d,2d,12,3o,3o,3o,3o,3o,3o,2h,2h,y,y,y,y,y,i,i,y,1z,1z,1z,1z,1z,1z,1z,r,r,r,r,r,r,r,r,r,r,r,r,2g,2g,2g,2g,2b,2b,2b,2b,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,v,v,v,v,v,v,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,w,w,w,w,w,w,w,w,w,w,w,w,2f,2f,2f,2f,k,k,k,k,k,k,k,k,k,k","P":"7,e,f,5,d,9,2,3,i,g,7,e,6,2,3,j,k,7,5,2,3,j,k,3,q,a,g,7,e,8,u,f,c,d,9,n,q,i,g,6,6,q,5,n,c,e,7,8,i,a,k,j,q,u,f,6,d,n,q,2,3,n,5,f,u,6,e,8,u,f,6,c,5,d,9,2,7,3,q,j,b,a,0,1,n,k,e,u,f,d,9,7,7,8,u,6,c,e,i,5,g,3,2,7,5,e,8,u,f,6,c,d,9,c,7,e,8,u,6,5,i,g,9,d,u,c,6,f,e,7,5,8,u,8,e,7,f,6,5,1,0,c,i,a,b,k,g,q,n,3,2,9,d,j,e,8,u,f,6,c,5,d,9,7,d,e,8,u,f,6,c,5,9,7,5,c,6,u,a,8,e,f,9,2,d,n,q,j,k,b,i,g,0,1,3,u,f,9,5,d,7,e,8,u,f,6,c,5,2,9,0,n,q,j,k,b,a,i,g,3,1,9,c,7,6,e,1,0,g,i,a,q,b,3,2,9,d,5,c,n,2,3,9,q,d,n,5,e,6,f,u,8,k,7,c,j,u,7,e,8,f,9,c,5,d,6,2,3,n,q,k,j,2,3,0,2,3,n,1,q,b,n,a,a,i,i,g,g,1,9,9,b,d,q,0,d,7,7,e,6,6,c,c,5,e,5,c,u,f,f,3,6,6,c,u,5,d,d,9,2,2,9,5,8,3,e,q,k,8,7,7,e,n,n,q,j,j,k,7,5,9,n,3,2,9,u,8,7,q,f,j,b,a,0,1,k,i,b,a,g,0,1,j,k,n,3,q,2,g,b,a,i,0,1,9,3,u,8,7,n,f,q,0,a,b,2,k,1,j,0,g,1,a,b,i,9,7,8,u,f,2,3,q,j,k,b,a,0,1,n,k,j,2,5,e,3,7,u,5,6,f,3,2,9,d,5,c,8,f,u,e,7,6,n,i,q,g,3,7,3,1,0,n,2,u,d,5,c,6,f,8,7,9,e,7,e,7,8,u,6,f,1,0,g,a,b,k,i,q,j,5,d,9,c,3,n,2,2,3,9,u,6,5,d,2,b,n,q,j,k,a,i,g,3,0,1,0,b,3,a,2,3,2,9,e,f,8,7,n,c,q,5,k,j,g,i,a,b,2,j,q,n,3,9,8,5,f,u,i,e,7,d,g,k,e,7,9,5,c,6,f,u,8,d,k,j,3,9,5,2,2,3,9,e,5,7,8,d,7,6,u,1,g,i,a,b,k,0,q,n,3,2,f,9,c,j,2,b,k,j,q,n,3,a,7,8,6,c,5,0,1,q,7,3,2,8,n,i,7,8,u,f,6,5,n,q,e,0,1,0,g,i,1,e,e,8,u,6,f,f,6,7,c,u,7,c,5,d,5,1,0,0,g,g,i,i,a,a,b,b,k,1,j,k,9,d,2,2,3,9,n,n,q,q,j,3,d,9,5,c,6,f,u,8,7,e,1,3,7,7,8,8,2,2,3,q,n,q,i,i,1,1,n,1,7,3,8,f,c,9,n,e,j,k,b,a,i,g,0,1,q,c,6,f,8,e,7,5,d,2,9,0,1,i,a,b,k,j,3,g,a,0,b,3,2,1,0,6,u,e,7,j,k,2,6,n,q,b,a,3,i,g,6,8,u,0,g,i,1,0,g,3,2,i,q,2,3,9,n,0,g,i,9,d,e,7,1,7,8,1,0,q,6,u,8,7,e,2,3,n,q,1,0,3,0,2,8,5,1,f,u,1,1,g,0,e,5,2,9,j,k,b,i,3,k,j,3,u,2,5,c,6,f,u,8,q,n,f,u,8,e,5,q,3,j,k,k,2,b,a,i,q,k,q,3,i,2,2,e,e,3,g,0,g,0,i,3,n,q,k,g,j,2,3,k,1,c,0,2,1,1,f,c,d,e,9,c,g,3,1,6,f,f,f,u,8,u,6,8,8,u,c,6,c,c,9,9,9,d,d,5,5,5,d,1,0,c,6,g,0,i,1,f,8,e,6,c,u,d,9,2,3,n,q,j,k,i,g,5,3,2,0,i,g,1,0,7,1,3,2,3,0,1,3,2,d,0,u,0,e,8,u,f,6,c,q,d,5,n,3,2,9,f,6,5,d,0,e,6,f,c,u,d,5,g,i,k,j,9,n,3,2,q,0,7,u,2,3,j,k,0,1,j,k,3,2,9,u,6,f,q,a,n,1,a,b,k,j,3,2,f,c,9,q,3,n,1,2,1,1,1,9,9,9,1,8,5,6,f,3,2,9,6,5,7,6,c,5,9,n,q,j,k,e,0,f,e,f,6,d,5,n,q,1,2,3,e,7,1,3,u,8,c,f,5,e,9,n,q,d,n,q,7,d,9,e,6,f,u,e,1,1,i,a,k,j,3,k,n,g,i,q,n,q,k,i,g,3,e,8,9,2,6,n,q,b,a,1,3,1,i,q,n,3,2,8,8,6,c,f,9,q,n,3,2,e,9,d,e,6,5,9,f,q,n,1,3,2,n,f,j,k,0,1,q,1,0,e,8,f,6,c,5,d,9,9,n,q,e,1,f,6,2,3,8,0,3,n,q,c,9,2,f,j,3,d,e,d,f,1,6,8,8,6,e,a,b,q,n,9,3,2,c,e,8,6,5,d,0,n,q,j,k,i,g,9,e,9,c,6,8,3,2,8,6,d,0,6,d,5,f,f,8,q,n,f,f,8,6,0,d,2,c,3,d,6,e,1,k,j,3,2,6,8,8,9,9,2,2,3,3,0,0,1,8,8,6,6,9,9,2,2,3,3,1,b,q,q,b,0,0,1,1,e,e,9,e,6,1,2,3,0,j,e,6,2,3,k,g,i,c,e,5,9,2,n,3,1,q,1,0,n,3,2,q,q,q,n,9,9,d,d,c,c,e,e,n,1,0,k,j,q,n,3,2,5,e,3,n,q,j,2,k,9,6,5,c,8,e,d,b,3,b,a,g,i,i,g,0,1,a,2,e,0,0,n,n,3,e,8,8,f,3,6,6,c,f,5,5,d,d,9,9,2,c,c,c,5,5,3,3,k,k,8,e,d,9,2,3,j,k,0,1,0,1,n,n,5,9,i,i,g,g,1,e,1,j,k,b,a,i,g,0,q,1,3,e,8,f,6,c,5,9,2,n,9,9,5,5,e,8,e,q,8,q,j,k,k,j,e,e,d,d,n,n,q,q,c,8,6,6,8,e,e,c,5,8,e,e,8,f,d,6,6,5,d,2,2,n,n,i,i,0,1,f,e,n,f,f,n,q,q,e,q,q,n,n,1,c,5,d,9,q,n,6,e,8,f,3,f,e,6,8,c,2,d,q,n,5,9,d,5,c,6,f,8,e,q,n,3,2,9,2,3,n,e,q,f,6,5,d,9,8,3,q,n,3,2,9,d,5,c,6,f,8,e,d,5,5,d,9,n,n,9,3,3,2,2,9,9,5,6,6,e,e,n,5,n,q,q,1,i,f,j,3,2,9,d,5,k,6,8,c,k,n,q,n,6,6,k,q,6,6,1,q,q,d,d,c,8,8,c,6,8,8,e,e,6,c,5,c,9,9,5,f,6,2,3,n,q,8,e,e,6,6,c,c,9,9,c,9,2,3,n,q,j,k,f,e,f,6,c,d,9,5,3,n,q,2,9,6,9,e,e,6,j,k,b,b,a,a,0,g,1,q,i,n,2,3,8,6,c,5,d,9,f,8,8,6,6,c,c,5,5,0,9,c,6,e,6,d,9,6,i,0,1,g,n,9,5,c,e,i,a,g,2,j,3,8,k,0,b,1,0,1,3,1,0,b,k,j,a,0,a,b,1,8,8,5,9,d,d,9,5,g,6,0,9,1,i,g,6,9,i,0,1,8,f,f,6,c,5,d,9,8,6,d,5,d,9,8,f,6,c,5,9,c,8,8,6,d,3,g,i,3,c,5,9,2,n,d,q,n,q,6,9,2,3,0,n,q,j,k,8,8,2,3,n,q,6,c,c,5,6,5,a,a,b,b,1,d,5,5,c,c,8,f,f,8,d,6,9,6,2,9,k,j,q,q,j,n,n,3,3,2,k,p,r,r,y,11,7,y,11,11,m,w,7,r,16,18,m,12,p,z,16,e,y,11,y,18,m,p,r,10,z,10,11,e,7,y,11,18,m,12,p,w,z,16,7,e,10,y,11,18,r,m,0,g,i,d,d,c,c,7,e,y,11,y,11,11,z,7,e,r,y,11,11,p,7,11,z,e,r,p,r,r,7,0,z,r,10,7,13,w,p,11,y,14,g,g,0,0,g,5,5,8,8,7,7,11,r,r,11,y,y,9,14,9,14,5,g,y,y,z,14,14,7,7,e,e,5,d,d,9,9,a,z,5,d,9,c,6,8,f,y,11,w,10,7,e,6,c,9,a,b,p,16,16,16,16,11,11,11,y,p,11,p,13,w,w,w,w,13,y,r,r,r,r,7,7,p,y,7,y,7,e,e,e,8,8,8,8,f,6,6,6,c,c,c,e,5,5,5,5,d,d,d,d,9,9,9,9,c,7,0,11,11,12,12,w,w,7,7,e,e,d,d,7,11,e,2,3,i,g,0,7,0,g,g,n,3,2,e,y,12,7,7,7,7,14,14,z,10,z,13,13,m,m,y,y,10,5,5,10,10,z,13,13,w,w,z,12,y,y,1a,1a,12,w,w,p,p,12,12,13,z,13,10,z,10,7,7,14,14,m,10,10,m,3,2,j,b,a,i,g,0,1,k,2,3,3,2,1,1,0,1,1,1,1,1,m,10,z,8,6,c,5,d,9,t,v,l,10,10,14,7,7,5,5,14,2,3,3,2,i,0,g,n,x,x,s,s,h,h,o,o,l,19,v,l,q,n,2,8,8,q,3,2,n,7,w,t,w,12,12,v,7,e,2,e,k,k,j,j,3,w,13,z,r,r,w,13,p,16,12,12,16,y,y,17,19,z,p,10,7,14,9,9,d,d,10,5,c,c,6,5,f,f,8,8,e,e,7,6,14,x,x,s,s,h,o,o,l,l,h,1,0,7,10,w,p,16,y,e,12,f,z,9,5,l,l,o,o,h,h,s,s,x,x,l,o,a,l,x,x,a,s,h,h,s,o,0,o,l,l,o,h,s,s,x,x,h,h,h,0,e,7,b,a,a,0,1,b,3,x,x,s,s,h,h,o,o,l,l,17,19,v,t,2,12,y,16,12,r,p,7,5,6,e,9,d,5,c,8,e,7,r,12,16,y,6,d,9,c,d,9,y,12,p,16,7,e,6,c,5,r,7,c,6,l,l,w,o,o,a,a,b,b,3,2,d,0,16,y,s,s,h,h,8,a,x,a,b,b,x,s,l,h,h,o,o,l,s,l,1,q,n,3,2,w,9,s,h,h,o,o,l,s,2,3,7,w,s,s,o,o,l,l,9,1,x,x,h,h,l,l,0,g,i,2,3,n,0,1,q,p,16,12,w,z,7,e,8,6,5,9,y,8,16,16,z,w,12,7,12,e,w,p,5,c,6,9,e,7,z,8,y,12,12,16,16,y,s,l,19,v,o,p,p,w,1,w,9,9,6,6,8,3,10,10,z,z,13,13,8,a,a,b,b,p,p,w,w,b,b,3,x,t,17,o,19,v,a,h,a,s,17,19,t,v,a,b,b,a,b,b,a,1,a,t,19,l,h,s,x,3,17,19,17,12,d,12,9,9,2,3,d,e,y,y,16,16,12,12,14,7,7,e,14,8,f,f,d,8,d,9,9,b,b,a,a,7,7,d,d,0,7,7,1,0,s,o,6,b,b,a,a,7,b,b,a,a,7,7,e,c,6,8,o,9,2,0,1,9,7,6,2,3,9,o,16,16,9,1,b,b,a,a,i,g,0,o,x,l,0,a,x,a,0,1,o,b,a,a,b,l,h,2,3,1,2,3,0,0,1,0,3,2,z,w,0,1,o,b,a,w,3,13,1,2,16,12,s,p,h,o,l,w,n,7,6,5,2,3,q,0,1,13,10,z,19,17,12,p,9,2,3,e,i,f,s,t,v,19,17,l,o,h,x,p,w,13,z,2,3,12,t,v,o,l,s,x,3,h,2,l,19,2,3,n,q,p,p,t,v,0,h,19,19,y,z,z,2,3,y,w,w,6,8,r,p,w,w,r,7,8,8,7,h,1,3,1,o,17,t,o,v,x,2,3,h,c,6,8,z,r,13,13,w,12,z,12,16,16,p,10,w,14,14,7,7,e,e,8,8,c,9,9,10,10,6,10,d,d,p,9,14,w,z,2,0,1,3,10,13,3,2,10,l,x,y,7,7,10,z,w,p,w,13,r,z,10,14,7,e,8,6,5,d,9,p,w,13,r,z,10,7,8,6,5,d,14,18,16,l,12,m,w,b,j,3,9,c,6,8,d,7,e,13,r,p,10,14,z,d,5,c,6,14,e,10,z,13,w,y,8,6,8,14,10,z,r,d,v,t,17,3,f,0,3,6,14,x,l,2,t,z,d,9,13,z,5,p,6,12,v,m,18,y,o,t,2,3,w,e,7,10,z,9,y,12,6,5,8,r,w,r,w,13,4,4,1a,3,3,2,2,s,s,o,o,f,a,s,o,t,9,d,6,13,w,16,3,l,w,z,e,7,10,15,15,7,w,13,z,10,7,c,5,v,19,t,16,18,17,12,w,13,r,6,m,0,0,15,15,8,10,w,p,i,y,x,x,l,o,h,h,o,l,i,s,g,s,0,g,0,9,5,8,7,e,r,2,9,c,e,7,w,m,18,15,15,s,s,3,o,o,v,19,17,l,t,l,p,w,13,r,z,c,14,e,8,f,12,10,y,x,15,15,15,x,2,s,s,h,h,o,o,l,l,15,3,7,q,n,i,g,g,0,0,i,s,l,l,o,o,s,15,15,9,0,0,t,h,h,y,y,0,0,o,x,o,l,l,x,17,v","K":"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,0,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,0,0,0,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,0,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,6,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,6,6,6,6,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,0,0,0,0,0,3,0,3,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,3,3,0,4,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,3,2,2,0,0,0,0,0,0,0,0,0,4,0,0,0,0,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,0,0,0,0,0,0,0,0,0,0","Z":"4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,8,8,8,8,5,5,5,5,5,5,5,5,5,5,5,5,5,6,1,1,1,1,1,1,1,6,6,6,6,6,6,6,6,6,6,7,7,7,7,5,5,5,5,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5,5,5,5,5,5,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,5,5,5,5,5,5,3,3,3,3,3,3,5,5,5,5,5,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,5,5,5,5,5,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,4,4,4,4,4,4,4,5,5,5,5,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,4,1,1,1,1,3,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,4,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,0,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,4,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,5,5,5,5,5,5,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,6,6,6,6,6,6,0,0,0,0,0,1,7,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,5,5,8,8,8,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,7,0,0,0,3,7,9,5,5,5,6,6,5,5,5,5,5,0,4,4,4,4,4,4,4,4,4,4,4,4,4,3,3,3,3,3,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,0,0,4,4,4,4,0,0,2,2,4,4,0,0,0,0,0,0,0,5,5,5,4,4,4,4,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,8,8,0,1,1,1,9,9,9,9,9,9,9,9,0,0,0,0,0,0,9,9,9,9,1,1,1,1,1,1,6,6,6,6,6,6,6,6,6,6,6,6,1,1,1,1,1,1,1,1,1,1,1,7,7,7,7,7,7,7,1,1,1,1,1,3,3,3,3,5,5,3,1,1,1,1,1,0,0,2,9,9,9,9,9,9,9,9,9,1,5,4,4,4,4,4,4,4,4,1,1,1,0,0,0,0,0,0,0,8,1,1,1,1,1,1,1,0,0,0,0,0,2,0,9,9,9,9,9,4,4,4,4,4,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,1,1,1,1,5,5,2,2,2,2,0,3,3,3,9,9,1,1,1,1,1,1,1,1,1,1,1,9,9,9,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9,9,9,9,8,8,8,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,4,4,4,4,4,4,4,4,4,4,0,0,2,2,8,8,8,8,8,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,9,9,9,9,9,9,9,9,9,9,9,9,9,1,1,1,1,1,1,1,1,9,9,9,9,9,9,9,9,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,6,6,6,6,6,6,6,6,4,4,4,4,0,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,4,4,4,4,4,4,4,4,4,4,4,2,2,2,2,2,2,2,2,0,0,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,6,6,6,6,6,6,6,6,6,8,8,8,8,8,8,8,8,8,8,8,0,0,0,0,0,0,6,6,6,6,6,6,6,6,6,6,6,6,6,6,4,4,4,4,4,4,4,2,2,2,2,2,2,2,2,2,0,0,0,0,0,5,3,3,3,3,3,3,5,5,5,5,5,4,4,4,4,4,4,4,4,4,4,4,2,2,5,5,5,5,5,5,5,2,2,2,0,9,9,9,9,9,9,9,9,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,0,0,4,4,4,4,4,4,4,4,4,4,1,1,1,1,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,4,4,5,5,5,5,4,4,4,4,4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5,5,5,5,5,0,0,0,0,0,0,0,5,5,5,5,4,4,4,4,4,4,4,6,6,6,6,6,5,5,5,6,4,4,5,4,0,4,4,4,6,6,6,6,6,6,6,7,7,7,7,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,7,7,4,4,4,4,5,3,0,0,9,9,9,9,9,9,9,9,9,9,9,9,9,9,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,4,4,4,4,4,4,4,4,4,4,0,0,0,0,0,3,6,6,5,5,1,7,1,1,4,4,4,4,4,4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,2,2,6,6,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,8,8,8,8,8,8,8,8,8,8,8,8,0,0,0,0,0,0,0,0,0,0,0,6,6,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,b,b,b,b,b,b,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,a,a,a,a,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,0,0,0,0,6,6,6,6,6,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,5,5,5,5,6,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,1,1,1,1,1,1,2,2,5,5,1,1,1,1,1,1,0,0,0,0,0,0,0,6,6,6,7,4,4,4,4,4,4,0,0,0,0,4,4,4,4,0,4,4,0,0,1,1,1,1,1,1,5,5,5,0,0,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5,5,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,4,4,4,4,4,4,4,4,5,5,5,3,3,3,3,1,1,3,3,3,3,1,1,1,1,1,1,1,1,0,0,7,7,7,1,1,1,1,1,1,1,1,4,1,4,1,1,8,8,8,8,8,8,8,8,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,2,1,1,1,1,1,1,1,1,1,1,1,1,0,4,4,4,4,2,2,2,2,2,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,5,5,5,5,2,1,1,1,1,1,1,3,3,4,3,3,6,6,6,6,6,6,6,6,6,6,6,6,6,6,1,1,1,1,1,1,1,1,0,0,0,0,0,7,7,6,0,0,5,5,5,5,5,5,5,5,5,3,5,5,5,8,2,2,2,2,2,2,4,4,2,2,2,2,2,5,5,2,9,9,9,9,9,9,9,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,3,3,3,3,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1,1,1,1,1,1,1,1,1,1,6,6,6,6,7,7,7,7,7,7,7,7,7,7","V":"2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,6,6,6,6,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,2,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,8,8,8,8,8,0,0,8,8,8,8,8,8,8,8,8,8,8,8,3,3,3,3,3,3,3,3,3,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,3,8,8,8,8,8,8,8,0,0,0,0,0,1,1,1,1,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,3,3,3,3,3,0,3,3,3,3,8,8,1,1,1,8,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,0,3,6,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,1,1,0,0,2,2,1,6,6,6,6,6,6,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,0,0,0,1,1,1,1,1,1,1,2,0,0,0,0,0,0,0,1,1,1,1,1,0,1,0,0,0,0,0,2,2,2,2,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,2,2,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,4,4,0,0,2,2,2,2,2,2,2,2,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,4,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,1,1,1,1,1,2,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,2,2,2,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,4,4,2,2,2,2,2,2,2,2,2,2,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,4,4,4,4,4,4,4,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,7,7,7,7,7,7,7,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,4,4,2,2,2,2,2,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,0,2,2,2,2,0,2,0,0,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,4,4,4,4,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,4,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,1,1,1,4,4,4,2,2,2,4,2,2,2,2,2,2,1,1,1,1,2,2,2,2,1,2,2,4,1,0,0,0,0,0,0,2,2,2,1,1,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,4,4,4,0,0,0,0,0,0,0,0,2,0,2,0,0,2,2,2,2,2,2,2,2,7,7,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,4,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,2,7,7,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,4,4,4,4,4,4,4,2,5,5,2,2,2,2,2,2,2,2,2,7,2,2,2,2,0,0,0,0,0,0,2,2,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,4,4,4,4,4,4,4,4,4,4","F":"6,6,6,6,6,6,6,6,6,6,4,4,4,4,4,4,4,8,8,8,8,8,8,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,5,a,a,a,a,a,a,a,1,1,1,1,1,1,1,1,1,1,0,0,0,0,c,c,c,c,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,7,7,7,7,7,7,b,b,b,b,b,b,b,b,b,d,d,e,e,e,e,e,e,e,e,e,e,f,f,f,f,f,f,f,f,f,i,i,i,i,i,i,i,i,i,i,g,g,g,h,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,k,k,k,k,k,k,k,k,k,k,j,j,j,j,j,j,j,j,j,j,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,m,m,m,m,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,o,o,q,q,q,q,q,q,q,q,q,q,q,q,q,q,q,q,q,p,p,p,p,p,p,p,p,p,p,p,p,p,p,p,p,r,r,r,r,r,r,r,r,r,r,v,v,v,v,v,v,u,u,x,x,x,x,u,x,x,u,x,u,x,u,x,u,x,u,x,u,x,u,u,u,x,u,x,x,u,x,u,x,u,u,s,t,s,t,s,s,t,t,s,t,s,t,s,t,s,t,s,t,t,t,t,t,s,s,t,s,s,t,s,s,t,s,w,w,w,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,z,z,z,z,z,z,10,10,10,10,10,10,11,11,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,13,13,13,13,13,13,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,17,17,17,17,17,17,17,16,16,16,16,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,1d,1c,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,1b,19,1a,19,19,19,19,1a,1a,1a,1a,1a,1a,1a,1a,1a,19,19,19,19,1a,1a,1a,1f,1f,1e,1e,1e,1e,1e,1e,1e,1e,1e,1e,1e,1e,1e,1e,1e,1e,1h,1h,1h,1h,1h,1h,1g,1g,1g,1g,1g,1g,1g,1g,1g,1g,1g,1g,1g,1g,1g,1g,1g,1i,1i,1i,1i,1i,1i,1i,1i,1i,1i,1i,1i,1i,1i,1i,1i,1j,1j,1j,1j,1j,1j,1j,1j,1j,1j,1k,1k,1k,1k,1k,1k,1l,1l,1l,1m,1m,1n,1m,1m,1m,1m,1m,1m,1m,1m,1m,1m,1m,1m,1m,1m,1m,1m,1m,1m,1m,1m,1o,1o,1o,1o,1o,1o,1o,1o,1p,1v,1v,1v,1v,1r,1s,1s,1s,1s,1s,1s,1s,1s,1u,1u,1u,1u,1u,1u,1u,1u,1u,1q,1t,1z,1z,1z,1z,1w,1x,1w,1x,1w,1x,1w,1x,1w,1x,1w,1x,1w,1w,1x,1x,1x,1x,1w,1w,1x,1w,1x,1x,1w,1x,1w,1w,1w,1w,1x,1x,1w,1x,1w,1x,1w,1x,1w,1w,1x,1x,1w,1y,1y,1y,1y,1y,1y,1y,1y,1y,1y,23,20,20,21,20,21,20,21,21,21,21,20,20,21,20,21,20,22,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,26,26,26,26,26,26,28,28,28,28,28,27,27,2a,2a,2a,2a,2a,2a,2a,29,29,2j,2j,2j,2h,2h,2h,2d,2d,2d,2d,2d,2d,2c,2c,2c,2c,2c,2b,2b,2b,2b,2b,2b,2b,2b,2e,2e,2g,2i,2i,2i,2i,2i,2i,2i,2f,2f,2f,2f,2f,2k,2l,2l,2l,2m,2m,2m,2m,2m,2n,2t,2t,2t,2t,2t,2t,2t,2t,2t,2t,2t,2t,2r,2r,2r,2r,2r,2s,2s,2s,2s,2s,2s,2q,2q,2q,2q,2q,2q,2q,2o,2o,2p,2p,2o,2o,2p,2p,2o,2p,2o,2o,2o,2o,2o,2p,2o,2o,2p,2o,2o,2o,2o,2u,2u,2u,2u,2u,2u,2v,2v,2v,2v,2x,2w,2y,30,31,34,32,32,2z,2z,2z,33,33,33,39,35,36,37,35,37,37,35,36,36,35,36,35,37,36,37,37,36,35,36,35,36,37,35,37,38,3a,3b,3b,3d,3d,3d,3d,3c,3c,3c,3c,3c,3c,3c,3c,3c,3c,3c,3c,3c,3c,3c,3c,3c,3e,3e,3f,3h,3h,3j,3i,3g,3k,3l,3l,3o,3n,3n,3q,3q,3q,3q,3q,3m,3p,3p,3p,3p,3p,3p,3p,3p,3p,3p,3p,3p,3p,3r,3r,3r,3r,3s,3t,3t,3t,3t,3t,3t,3t,3t,3t,3t,3t,3t,3t,3t,3t,3t,3w,3v,3v,3x,3x,3x,3x,3u,3u,3y,3y,40,40,3z,41,41,41,41,41,41,42,42,42,43,43,43,43,44,44,44,44,44,44,44,44,45,45,46,47,48,48,49,4b,4b,4b,4b,4c,4c,4c,4c,4c,4a,4a,4a,4a,4a,4a,4a,4a,4a,4a,4a,4a,4d,4d,4d,4d,4d,4d,4d,4d,4d,4d,4e,4e,4f,4g,4g,4g,4h,4h,4h,4h,4h,4h,4h,4h,4i,4i,4j,4j,4j,4j,4k,4k,4k,4k,4l,4m,4m,4m,4m,4m,4n,4n,4n,4n,4n,4n,4o,4o,4o,4o,4o,4o,4p,4p,4p,4p,4p,4p,4p,4p,4p,4p,4p,4q,4q,4q,4q,4q,4q,4q,4r,4r,4r,4r,4r,4t,4t,4t,4t,4s,4s,4u,4v,4v,4v,4v,4v,4w,4w,4x,4y,4y,4y,4y,4y,4y,4y,4y,4y,4z,50,51,51,51,51,51,51,51,51,52,52,52,53,54,53,53,53,53,53,55,56,57,57,58,58,58,58,59,59,59,59,5a,5b,5c,5d,5d,5e,5e,5e,5f,5f,5f,5f,5f,5g,5g,5h,5h,5h,5h,5h,5h,5h,5h,5h,5h,5h,5h,5h,5h,5i,5k,5k,5k,5k,5j,5j,5l,5l,5l,5l,5m,5n,5n,5n,5o,5o,5p,5p,5p,5q,5q,5q,5q,5q,5q,5q,5q,5r,5r,5r,5s,5s,5s,5s,5s,5s,5t,5u,5t,5u,5t,5u,5t,5u,5x,5x,5y,5v,5v,5v,5v,5v,5v,5v,5v,5v,5v,5v,5w,5w,5w,5w,5w,5w,5w,5w,5z,5z,61,61,61,61,61,61,61,60,60,60,60,60,60,60,60,63,63,63,63,63,63,63,63,63,64,64,64,64,64,64,66,66,66,66,66,66,66,66,66,66,66,66,65,65,65,65,65,65,65,65,65,65,62,62,62,62,62,62,62,62,62,62,62,62,62,67,67,67,67,67,67,67,67,67,67,67,6b,6b,6b,6b,6b,6b,6b,6b,6b,6b,6b,6b,6b,6b,6b,6b,6b,6b,6b,6b,6b,6b,6b,6b,6a,6a,6a,6a,6a,6a,6a,6a,69,69,69,69,69,69,69,69,69,69,6e,6e,6f,6f,6c,6c,6c,6c,6c,6c,6c,6c,6d,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,6g,6g,6g,6g,6g,6g,6g,6g,6g,6g,6g,6g,6g,6g,6h,6h,6h,6h,6h,6h,6h,6h,6j,6j,6j,6j,6j,6j,6j,6j,6i,6i,6i,6i,6i,6i,6i,6i,6i,6i,6i,6i,6i,6i,6i,6i,6i,6i,6i,6i,6l,6l,6l,6l,6l,6l,6l,6l,6k,6k,6k,6k,6m,6n,6n,6n,6n,6n,6n,6n,6o,6o,6o,6n,6n,6n,6o,6n,6o,6n,6o,6q,6q,6o,6q,6q,6q,6q,6q,6q,6q,6q,6r,6r,6q,6r,6o,6o,6o,6o,6r,6o,6r,6r,6r,6r,6r,6r,6r,6p,6p,6p,6p,6p,6p,6p,6p,6p,6p,6p,6p,6s,6s,6s,6s,6s,6s,6s,6s,6t,6t,6t,6t,6t,6t,6t,6t,6t,6t,6t,6t,6t,6t,6t,6t,6t,6t,6u,6u,6u,6u,6u,6u,6u,6u,6u,6u,6u,6w,6w,6w,6w,6w,6w,6w,6w,6x,6x,6y,6y,6y,6y,6y,6y,6y,6y,6y,6v,6v,6v,6v,6v,6v,6v,6v,6v,6v,6v,6v,71,71,71,71,71,71,71,72,72,72,72,72,72,72,72,73,73,73,73,73,73,73,73,73,76,76,76,76,76,76,76,76,76,76,76,75,75,75,75,75,75,6z,6z,6z,6z,6z,6z,6z,6z,6z,6z,6z,6z,6z,6z,74,74,74,74,74,74,74,70,70,70,70,70,70,70,70,70,78,78,78,78,77,7a,79,79,79,79,79,79,7b,7b,7b,7b,7b,7c,7c,7c,7c,7c,7c,7c,7c,7c,7c,7c,7e,7f,7d,7d,7d,7d,7d,7d,7d,7h,7h,7h,7g,7i,7i,7i,7i,7i,7i,7i,7i,7k,7k,7k,7k,7k,7k,7j,7j,7j,7j,7j,7j,7l,7m,7l,7l,7l,7l,7l,7l,7m,7m,7n,7m,7m,7m,7n,7n,7n,7n,7n,7n,7m,7p,7o,7o,7o,7o,7o,7o,7q,7q,7q,7q,7q,7q,7q,7q,7r,7r,7s,7s,7s,7s,7s,7s,7s,7s,7s,7t,7t,7v,7v,7v,7v,7u,7u,7u,7u,7u,7u,7w,7w,7w,7w,7x,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,7y,84,84,82,82,82,82,8c,8c,8c,8c,8c,8c,7z,7z,7z,7z,7z,7z,7z,80,7z,80,80,7z,80,80,80,80,7z,80,80,7z,80,80,8d,8d,8d,8d,8d,8d,8d,8d,8d,8d,8d,8d,89,89,89,89,89,88,88,88,88,88,88,88,83,83,83,83,87,87,87,87,87,87,87,86,86,8a,8a,8a,8f,8f,8f,85,8b,8b,81,8e,8k,8j,8j,8j,8i,8i,8i,8i,8i,8i,8i,8h,8h,8h,8h,8h,8g,8g,8g,8g,8g,8g,8g,8g,8g,8g,8g,8g,8g,8g,8g,8g,8p,8p,8p,8p,8p,8p,8p,8p,8p,8p,8p,8p,8p,8p,8p,8p,8p,8p,8s,8s,8s,8s,8s,8s,8s,8q,8q,8q,8q,8q,8q,8q,8q,8q,8w,8w,8l,8m,8n,8l,8o,8n,8o,8l,8m,8n,8m,8m,8m,8o,8l,8n,8m,8n,8n,8n,8m,8o,8l,8l,8o,8o,8o,8n,8l,8m,8o,8l,8m,8o,8l,8n,8m,8l,8o,8n,8m,8o,8l,8n,8n,8o,8l,8n,8m,8l,8o,8n,8m,8l,8o,8n,8m,8m,8u,8v,8t,8t,8t,8t,8t,8t,8t,8t,8t,8t,8t,8t,8r,8r,8r,8x,8x,8r,8r,8r,8y,8z,90,90,92,92,92,92,91,95,96,96,94,94,94,94,94,94,94,94,94,94,94,94,94,94,97,97,97,97,97,97,97,97,97,97,97,97,97,97,97,97,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,98,98,99,99,9b,9b,9b,9b,9b,9b,9b,9b,9b,9b,9a,9a,9a,9a,9g,9c,9d,9d,9h,9f,9e,9i,9j,9j,9l,9l,9l,9l,9l,9l,9l,9k,9k,9k,9k,9k,9k,9k,9k,9k,9k,9k,9k,9k,9k,9k,9m,9m,9m,9s,9s,9s,9s,9s,9s,9s,9s,9s,9s,9s,9s,9s,9r,9r,9r,9q,9q,9p,9p,9p,9p,9n,9n,9o,9n,9n,9n,9o,9n,9n,9n,9n,9n,9n,9n,9n,9n,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9t,9x,9x,9y,9y,9y,9y,9y,9y,9y,9y,9v,9v,9u,9u,9u,9u,9w,9u,9u,9u,9u,9u,9u,9u,9z,9z,9z,9z,9z,9z,9z,9z,9z,9z,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a3,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a2,a2,a8,a8,a8,a4,a4,a4,a4,a4,a4,a4,a4,a4,a4,a4,a4,a4,a4,a4,a4,a4,a4,a4,a4,a4,a4,a7,a6,a6,a6,a6,a6,a6,a6,a6,a6,a9,a9,a9,a9,a9,a9,a9,a9,a9,a9,a9,a9,aa,aa,a6,a6,a6,aa,aa,aa,aa,aa,aa,aa,aa,aa,aa,a5,a5,a5,ac,ac,ac,ac,ac,ac,ac,ac,ac,ac,ac,ac,ac,ac,ac,ac,ac,ac,ac,ac,ab,ab,ab,ab,ab,ab,ab,ab,ab,ab,ab,ab,ab,ab,ag,ag,ag,ag,ag,ag,ag,ag,ag,ag,ag,ag,ag,ag,ag,af,af,ad,ad,ad,ad,ad,ad,ad,ad,ad,ad,ae,ae,ae,ae,ae,ae,ah,ah,ah,ai,ai,ai,ai,ai,ai,aj,aj,aj,aj,aj,aj,aj,aj,aj,aj,aj,ak,al,al,ak,al,al,al,al,ak,al,ak,ak,ak,ak,ak,ak,ak,ak,ak,ak,am,am,am,am,am,am,am,am,am,am,am,am,am,am,am,am,am,am,am,am,am,am,am,am,am,am,am,am,am,an,an,ao,ao,aq,aq,aq,aq,ap,ap,ap,ap,ap,ap,ap,ap,ap,ap,ap,ap,ap,ar,ar,ar,ar,as,as,as,as,au,au,au,au,au,at,at,at,at,at,at,at,at,av,av,av,av,av,av,av,av,av,av,aw,aw,aw,aw,aw,aw,aw,aw,aw,aw,aw,aw,aw,aw,aw,aw,aw,aw,aw,aw,ax,ax,ax,ax,ay,ay,ay,ay,b0,az,az,b1,b1,b1,b1,b4,b5,b5,b5,b5,b2,b2,b2,b2,b2,b2,b3,b3,b3,b3,b3,b8,b8,b8,b8,b8,b8,b6,b6,b7,b7,b9,b9,b9,b9,b9,b9,bc,bc,bc,bc,bb,bb,bb,ba,ba,ba,bd,bg,bg,bg,bg,bg,bg,be,be,be,be,bf,bf,bf,bf,bh,bi,bi,bj,bk,bm,bm,bm,bm,bm,bm,bl,bl,bl,bn,bn,bo,bo,bo,bp,br,bq,bq,bq,bq,bq,bq,bq,bq,bq,bq,bq,bq,bq,bq,bq,bq,bq,bq,bs,bs,bt,bt,bt,bt,bt,bt,bt,bt,bv,bv,bu,bu,bu,bu,bu,bu,bu,bu,bu,bu,bu,bu,bu,bu,bu,bu,bw,bw,bw,bw,bw,bw,bw,bw,bx,bx,bx,by,by,by,by,bz,bz,c1,c1,c1,c1,c0,c0,c0,c0,c0,c0,c0,c0,c2,c2,c3,c3,c3,c4,c4,c4,c4,c4,c4,c4,c4,c5,c6,c7,c8,c8,c9,c9,c9,c9,c9,c9,c9,c9,ca,ca,ca,cb,cb,cb,cb,cb,cb,cb,cb,cb,cb,cb,cb,cb,cb,cb,cb,cb,cb,cb,cb,cb,cb,cb,cb,cb,cc,cc,cc,cc,cc,cd,ce,ce,cf,cf,cf,cf,cf,cf,cg,cg,ch,ch,ci,cj,cj,cj,cj,ck,ck,ck,ck,ck,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cm,cm,cm,cm,cm,cm,cm,cm,cm,cm,cm,cm,cn,cn,cn,cn,cn,cn,cn,cn,cn,cn,cn,cn,cn,cn,cn,cn,cn,cn,cn,cn,cn,cn,co,co,co,co,co,co,co,co,co,co,co,co,cp,cp,cp,cp,cp,cp,cp,cq,cq,cq,cq,cr,cs,cs,cs,cs,cs,cs,ct,ct,cu,cy,cz,cv,cv,cv,cv,cv,cv,cv,cv,cv,cv,cv,cv,cv,cv,cw,cw,cw,cw,cw,cw,cw,cw,cx,cx,d0,d0,d0,d1,d1,d2,d3,d4,d5,d6,d6,d7,d7,d7,d7,d7,d7,d8,d9,d9,d9,da,db,db,db,db,db,db,dc,dc,dd,dd,dd,dd,dd,de,de,df,dg,dg,dg,dg,dg,dg,dg,dh,dh,dh,dh,dh,dh,dh,dh,dh,dh,dh,dh,di,di,di,di,dl,dl,dl,dl,dj,dj,dj,dj,dj,dj,dj,dj,dj,dj,dj,dj,dj,dj,dj,dj,dj,dk,dk,dk,dk,dk,dk,dp,dp,dp,dp,dp,dp,dp,dp,dp,dp,dp,dp,dp,dp,dp,dp,dp,dp,dp,dp,dp,dm,dm,dm,dm,dm,dm,dm,dm,dm,dm,dm,dm,dn,dn,do,dn,do,dn,dm,dn,dn,dn,dn,dn,dn,dn,dn,dn,dm,dm,dm,dm,dm,dm,dm,dm,dm,dm,dt,dt,dt,dt,dt,dt,dt,dt,dt,dt,dt,dt,dq,dq,dq,ds,dr,dr,dr,dr,dr,dr,dr,dr,dr,dr","N":"1cdc,129c,24pc,2iuo,1oio,1ee0,1cgo,1ag0,19a0,19a0,c3c,9kc,yuo,1cgo,1ag0,11c0,11c0,1cdc,2iuo,1cgo,1ag0,11c0,11c0,2kw0,2is0,1ebo,19a0,2oqo,24io,2iuo,2iuo,24pc,1cgo,1oio,1ee0,1oio,1oio,2ik0,2ik0,1xpc,3veo,k5v,7ki3,k5v,2owj,36pf,5deh,2iu1,19a0,1ebo,11c0,11c0,u9c,19fc,12co,yuo,f4o,u9c,23lo,3d40,382c,23lo,19fc,12co,19fc,1xpc,9kc,mpo,mpo,j6c,yuo,o8c,mpo,f4o,cli,1cgo,c3c,1ag0,u9c,11c0,1ebo,1ebo,148c,1aww,u9c,11c0,129c,2iuo,24pc,2iuo,1ee0,1cdc,1ccm,2iu1,2iu1,1xoz,1cg9,128h,199i,2iu1,199i,2kuv,2owj,1ccm,2iu1,128h,2iu1,2iu1,24o8,3vdx,2owj,1ohl,1edg,1cg9,1ccm,128h,2iu1,2iu1,1xoz,2iu1,19a0,19a0,2sqo,1ohc,2iuo,2ow0,1xoo,24o0,36o0,4100,51pc,2iuo,51pc,2iuo,36o0,2oo0,49c0,3vdc,7kk0,1mkc,1uz4,2ow0,u6o,f56e,f56e,3gg0,u6o,23lo,1eeg,25dk,28qo,5lhc,3cyo,3gg0,128h,2iu1,2iu1,24o8,3vdx,2owj,2iu1,1ohl,1edg,1ccm,-1ohl,-128h,-2iu1,-2iu1,-24o8,-3vdx,-2owj,-2iu1,-1edg,-1ccm,-7kk0,-2ow0,-3vdc,-51pc,-f56e,-2iuo,-36o0,-49c0,-5lhc,-28qo,-3cyo,-1eeg,-23lo,-3gg0,-3gg0,-f56e,-u6o,-u6o,-1uz4,-1mkc,-25dk,4jhc,3u00,19c0,29qo,3cyo,2oo0,36o0,2iuo,51pc,49c0,3vdc,2ow0,7kk0,28qo,5lhc,1uz4,1eeg,23lo,3gg0,3gg0,f56e,f56e,u6o,u6o,25dk,1mkc,bc00,4ug0,153j,1n8m,wi0,27o9,2j4y,j8k,j8k,2djr,pph,2djr,13gq,156m,16tf,1fey,257j,156m,pph,156o,13go,16tc,ppc,1feo,ppc,2580,1t1c,1n8o,1t6o,2580,2580,vq0,2a80,2adc,vq0,4e1v,3i70,2rsl,270x,3pes,17tp,2cb0,270x,1gmi,3d9l,165c,165c,qbc,qbc,whc,whc,-156m,-13gq,2j40,1560,13go,ppc,-27o9,ppc,2dgo,-pph,2dgo,-2djr,j8i,-j8k,j8i,-j8k,27mo,-16tf,16tf,-2djr,1fey,-pph,-2j4y,-1fey,153j,-153j,wi0,1n8m,-1n8m,156m,-156m,257j,-wi0,-257j,2adc,-2580,1t6o,-1t6o,13go,1n8o,-1n8o,-2adc,2580,-2580,1feo,-1feo,16tc,-156o,156o,-16tc,2580,-2580,-13go,-1t1c,-ppc,-vq0,2580,2a80,-2a80,1t1c,ppc,-ppc,ppc,vq0,-vq0,vq0,2c4o,4e1v,2fne,u9c,1ag0,1cgo,1ee0,19fc,19fc,1cdc,u9c,12co,11c0,1ebo,1ebo,1hn4,1aww,11c0,19a0,1ebo,1ebo,19a0,1hn4,1aww,-whc,-whc,-qbc,-165c,-qbc,-165c,-19a0,-1ebo,-1ebo,-19a0,-1hn4,-1aww,-1ee0,-1ag0,-19fc,-19fc,-1cdc,-u9c,-12co,-u9c,-1hn4,-1ebo,-1ebo,-1cgo,-11c0,-1aww,-11c0,1hn4,19a0,1aww,1ebo,1ebo,19a0,1ee0,1cdc,19fc,19fc,12co,1cgo,1ag0,u9c,11c0,11c0,1ebo,1ebo,1hn4,1aww,u9c,11c0,11c0,1cgo,2iuo,129c,2kw0,1cdc,-19fc,-19fc,-1xpc,-12co,3vc0,41e0,1ee0,1oio,2iuo,2oxc,2iuo,24pc,2iuo,129c,1cdc,3veo,2is0,3ru0,2is0,3ru0,2kw0,4140,55pq,2lqf,2z7y,1ohl,arm2,2jvn,1p6n,2jvn,1d0b,1yht,25jz,2jvn,1cwn,48uw,12ob,4100,7yo,a2i,ixe,9gp,ein,7zi,1auo,4gqo,w2l,3ege,3ege,fv7,w2l,lf5,fv7,9gp,iwf,fqo,a3c,jqb,lf5,kl7,41e0,1ag0,1edg,2iu1,1xoz,2iu1,1ohl,41cs,1ebm,2iqe,2iqe,33z3,33z3,1ebm,199k,199k,3vaa,1hlz,1aww,1hn4,1ebo,2kw0,1ebo,2oxc,1ayn,1d0b,1eyb,12ob,25jz,2jvn,1cwn,ulb,1d0b,ulb,2jvn,11r5,11r5,7mq,7mq,1ewh,1ewh,2f7o,1v6o,1ifu,30vo,2bkl,19c4,29r1,29r1,1x07,29r1,kdb,yeu,17ik,1ifu,kdb,1v6o,8bmo,aiw0,aytc,js80,l3mo,ucyo,gp40,js80,js80,d62o,11r5,11r5,1ayn,1eyb,2jvn,1d0b,2kv0,3vai,19c0,-36o0,-7kk0,-2oo0,-2iuo,-3cyo,-2oo0,-3vdc,-51pc,-1mkc,-u6o,-u6o,-f56e,-f56e,-3gg0,-1uz4,-23lo,-1eeg,-25dk,-28qo,-49c0,-5lhc,-2ow0,-3gg0,2f7o,f3i,1v6o,1ifo,1ifo,1ifo,2bko,f3i,6puo,2iu1,3vdx,2owj,2iu1,22gk0,gfo,fq8,c3c,mhc,mhc,mpo,fq8,reo,c35,mpi,mpi,j6c,yuh,mpo,bso,bso,9k4,nrwc,4kco,9yzk,3u3i,3u3i,96b0,24g0,1280,2iuo,2iuo,1xoo,24o0,24o0,1xoo,1cc0,1cg0,2iuo,1cc0,1cg0,51pc,1ohc,2iuo,nfc,qsg,146o,f3c,f3c,f3c,f3c,2bvg,4nqw,2bvg,4nqw,1q80,z50,1q80,1q80,2sqo,1ohc,14dc,14dc,12os,2sqo,p78,p78,1eeg,p78,1q80,12os,6pyd,474c,51o2,5dt1,7qrv,49cg,51o2,6t80,411v,36pf,wvc,mhc,c3c,-c3c,mpo,-mpo,mhc,-mhc,-mhc,-fq8,-fq8,fq8,reo,-reo,gfo,-gfo,fq8,634w,153j,2t60,257j,1t67,156m,16tf,1ys0,wi0,2ao0,2ao0,2bso,2bso,reo,reo,3qyc,2a6c,1ys0,156m,1n8m,3mce,257j,3m00,3fal,6fml,1fey,2t60,3kga,1dzds,ufog,dpc0,ky60,ky60,1j40,1j40,2t60,dpc0,354i,6aq0,354i,uco,uco,1n60,63t,4k4,4af,1ro,2ad,w5c0,w5c0,5v0,4k4,3u6,3u6,8q0,8q0,5v0,dpc,4kg,2a2,1f6,1fh,1zz4,reo,reo,2jb1c,45y5c,2d9mo,165i0,165i0,2d9mo,jns,5mc0,5mc0,16tc,jns,ww8g,gxu5,gxu5,3hf7,46lk,2n80,576o,qwa5,aiw0,5xo0,94pc,63s,fco,4k4,2uy,2uc,1iw,16g,e1u0,e1u0,58qo,58qo,7ayo,c3c8,qdvh,lfk0,qdvh,19fc,19fc,lww,12co,19fc,94pc,oow,12h0,111c,yeo,19c0,45c,15mo,1rg0,1rg0,15o0,12h0,13go,5lk,5lk,79n,29qo,79n,19fc,1cgo,1xpc,12co,19fc,19fc,jns,jns,j6c,mpo,mpo,9kc,mpo,2mdc,-ezk0,2ao0,3280,-3280,-2t60,1xtw,6ze0,4kg0,2mdc,3280,-2mdc,ezk0,-4kg0,2t60,2t60,-ec6,ec6,3qw0,4kg0,9zvk,-4kg0,-9zvk,2a80,bpj0,4l5c,4l5c,9kg0,2a80,16v40,19we0,19we0,16v40,c69s,1cg9,9zvk,165i0,8sj28,2fnk,1fz,1uu,1feq,whm,16tc,1uu,4kg,5mc,3nhc,93w0,1o40,3c80,6og0,3yg0,3yg0,bvc0,31ao,3yg0,9w40,3yg0,7dvc,4jy0,23yo,35y0,13hc,13hc,3ag0,1beo,2mtc,1z80,2yu0,5xo0,1beo,ocjk,tzmo,2oxc,1xpc,reo,zzk,reo,lww,1t6o,2580,wio,1n8o,156o,2580,1feo,16tc,xq0,xq0,nlc,nlc,rk0,rk0,reo,reo,2580,19we0,19we0,7zwg,-25nk0,-25nk0,-94pc,1dzds,-c3c,ocjk,4om0,2t60,1vg0,18zz,re4,xq0,xq0,f4o,zzk,mpo,-4cq,129c,2iuo,2iuo,12co,1xpc,2oxc,39yo,1oio,2iuo,39yo,4om0,4om0,1ee0,24o8,bm5s,f506,51gs,chug,9kc,yuo,j6c,o8c,mpo,f4o,mpo,reo,reo,rk0,rk0,cli,nlc,xq0,xq0,nlc,9zvk,-1cc0,-2iuo,4om0,9d80,3ts0,7nk0,8xg8,7t3g,-w5c0,-w5c0,2t60,2t60,apc,1p9,2pn,1fz,3xk,6ze,3xk,1tqo,2bso,2bso,rk0,rk0,xq0,xq0,1x07,17lu,19c4,1b6o,xq0,1b6o,17ts,xq0,-634w,634w,634w,16tf,-16tf,16tf,ocjk,29r1,29r1,1qq2,1x07,xq0,xq0,2io7,1qq2,29r1,17ik,1qq2,17lu,29r1,19c4,nlc,nlc,rk0,rk0,yeu,qzo,1x07,wi0,1t67,1n8m,1fey,257j,1b6o,1b6o,634w,1vg0,1vg0,9kc,c3c,m0qe,xq0,m4z,29qo,2ad9,1t67,257j,1t00,3kga,nlc,nlc,2utx,c5mo,31eo,ejt,1feq,2dmo,whm,vd1,h92,kfr,pt4,-634w,g7c,13co,q8g,gv0,gv0,-bpj0,-9kg0,-4l5c,-2a80,-2a80,-4l5c,4l5c,4l5c,9kg0,2a80,2a80,bpj0,yeu,14vi,19c4,xq0,1qq2,nlc,nlc,15wc,15wc,lww,xq0,-gfo,-reo,-fq8,-fq8,-mhc,-mhc,-7kk,2iu1,1xoz,1cg9,24o8,1edg,1b6o,1b6o,1vg0,1vg0,491c,2ss1,u8o,24g0,1xoo,51pc,1edc,49c0,1bxc,5bpc,-ocjk,5mc,5mc,3xk,h90,4lc,4lc,4hy,2qm,3xk,-x1i,5zxc,9kc,mpo,j6c,yuo,o8c,mpo,f4o,cli,2io0,2mdc,2mdc,whm,icqo,1t60,3agq,mwj,bg9,jb1,zzk,-9d80,-nlc,-nlc,17lc,19c0,xq0,1x00,akt,d5i,1feq,whm,2uth,22r0,-ined,vd0,kg0,kg0,vd0,8lo,15wc,15wc,nlc,nlc,cli,1l9b,mwj,lst,8lm,kfw,vcw,kfw,dlw,zzk,nlc,nlc,rk0,rk0,reo,reo,bc0,yeo,p6o,1cg0,1xoo,19fc,xq0,xq0,mpo,yuc,f4c,1zz4,2wk,1ohc,14w0,1x00,yi0,116o,nlc,nlc,h90,24o0,2iuo,1xoo,3qyc,1ohc,5mc0,2ow0,5mc0,f4c,yuc,9k0,d9s0,3f40,3f40,6b1c,7kg0,wv0,2dtc,2dtc,1buo,1buo,5hbc,5hbc,3ae0,3ae0,x57a,-1nns,i9eo,2ic0,-4im,3ng0,-6km,2uio,-54j,3fc0,-18e,2a80,-tm,jvx5,12kw,10ia,-1tq,-1xg,kpr2,-11ad,m1h8,-13o9,-a0o,5kdc,pmo,k1c,1tq0,nv4,1540,1540,13ru,us9,k1c,gfi,1540,1540,us9,2jtk,2jtk,2f1c,22g0,7fs0,1btc,2a80,1hpc,2a80,34au,quo,1bq8,27jp,rdo,1540,1540,rdq,rdq,-1da,rdo,-n2,ctc,-sb,fqc,-15t,n8c,-i1,a0o,-1da,3z6n,4f3d,1pki,1pki,1irf,1irc,2a80,2a80,2kuo,142o,4kg0,1hpc,1hpc,2kc0,4kg0,2kc0,3zg0,1s3c,2h9c,2f1c,2710,3qxi,39hc,-2w6,1540,1lvc,1lvc,-2r6,1j3c,-2r6,1j3c,13ru,nv4,-2w6,-220,a0o,ttw,-1hp,-1da,rdo,1540,-i1,ml0,-14n,jho,-220,wv0,-1n5,n8c,-z3,n7o,-15s,fqc,-sb,ctc,-n2,1540,-15t,1ago,-2bn,1afc,-2bk,1540,-220,us9,-1jf,2ic0,142o,1qxc,1f9c,1540,1540,us9,us9,13ru,nv4,5763,4oga,19ms,-2a5,n7o,ctc,1j3c,-2r6,1j3c,-2r6,nv4,a0o,12zrk,us0,1a60,40oc,6p4k,20u8,2j1s,1y6s,18r4,2c85,1540,9b0,ajc,93i,g0u,avo,b5o,zv0,reo,mdk,-lj,byc,-136,lrc,9q0,l2o,-hi,pqq,-11y,-1ac,-1kc,var,-1kc,var,1aao,-2bc,1mqo,-2xq,umo,-32a,umq,-32a,-gc,l2o,-1lp,w1o,-11y,-hi,9q0,moo,1fuo,p00,-2bc,1aao,-190,2d6o,tdc,21w0,-3p0,-2lc,-1gv,17uo,-4dv,1p9c,-64j,13mo,-3yo,u3c,19dc,-49c,2klc,3eio,2d6o,-49c,-c92,3eiu,-c93,-4mo,2jw5,-96t,2jw0,-96t,-12zrk,51hc,4u2o,39hc,2nmo,2uyo,2uyo,74dc,25s0,4olc,41k0,43eo,41k0,25s0,74dc,4olc,51hc,43eo,39hc,2580,2580,4u2o,1btc,1mqo,2f1c,2iqo,3k6o,20s0,2cao,12w0,2uyo,2uyo,32k0,43eo,2nmo,6540,6540,4ag0,12w0,4ag0,20s0,3k6o,2f1c,1mqo,1btc,2cao,43eo,2uyo,2uyo,43eo,43eo,2nmo,39hc,4u2o,51hc,74dc,41k0,4olc,25s0,tdc,2vpc,-56o,-1gv,-1f8,umo,-32a,sgo,-4dv,17uo,-4dv,17uo,-2uh,1kxc,5reo,-2b5,1a6i,-2bc,1aao,umo,-adc,-32a,-32a,umq,19dc,13mo,73k0,33q9,639c,639c,4qs0,4w80,8n40,33q9,cbc0,8c00,90ie,-3q3,-96t,-96t,2jw0,-b30,65o0,118r,2jw5,g0u,-su,910,-55c,2uyo,-1gv,tdc,19dc,-11y,l2o,-29o,1s3c,-2j1,165c,-6ur,368i,-3ug,19dc,73o6,-2q0,-h7o,7yw0,-fc9,16lc,21w0,2fpc,2fpc,1p9c,1p9f,1e00,12w0,-2c0,1s3c,-3ug,19dc,-2q0,-2va,1btc,1i32,sgo,4veo,9qtc,umo,umq,118r,118r,lao,25s0,41k0,74dc,51hc,39hc,2nmo,4u2o,43eo,2uyo,2uyo,43eo,-sot,-24wt,da5c,2rni,-5z9,zluo,118r,118r,1h8o,-370,1h8o,-370,288w,13mo,1ohs,umq,13mo,umo,17uo,17uo,1e00,21w0,1i32,1fuo,tdc,sgo,16lc,1e00,-2i0,21w0,-3p0,1i32,-2pd,-2lc,1fuo,1o6o,-18y2,-16nc,-1o8w,-10k0,-xgxv,39hc,3zg0,74dc,111c0,1qcjq,144g0,111c0,1p9c,35uo,2vpc,1i32,1b9e,3pc0,41u0,2s00,32k0,1qlc,32k0,2cao,1qlc,3487,2p80,1c5c,a140,19dc,2fpc,51hc,gpuo,2yhc,22hi,22hi,2yhc,z3w0,nnuo,nnuo,17aso,-500,2s00,1fuo,-2uh,1mqo,-2xq,1kxc,-2lc,-111c0,-74dc,-1qcjq,-3zg0,-144g0,-111c0,111c0,74dc,3zg0,111c0,1qcjq,144g0,64o0,5900,5900,9vs0,6ps0,6ps0,4800,3gk0,64o0,9vs0,9uo0,6ps0,4800,3gk0,eaw0,c900,n25c,fo5c,fo5c,82mo,6ps0,1e00,5k00,65o0,39hc,3nk0,13mo,13mo,17uo,r1j,1fuo,sgo,17uo,umo,tdc,umq,3eio,2jw5,10y0,e8c,17uo,2fpc,6oqo,1p9c,1p9f,118r,22hi,-2mu,qcc,2fpc,2fpc,1p9c,1p9f,21w0,3065,-atf,2vpc,-7e0,-adc,-qqi,aly0,-qqi,aly0,-4e9o,9sg0,-15hc,bitc,-179o,c0oj,dw00,-16lc,btxc,-1e00,-z8t,gf40,9hk0,-1n40,4268,-h2t,3g56,-cex,-a7l,2u3p,3g56,-a7k,2u3k,-em8,4268,-em8,-cex,1xzc,29i0,22co,1y50,1tqo,2vmo,ndo,1tqo,-1bc,2ak8,1bs0,2vmo,7uio,sao,4ydc,4ydc,2dxc,7740,4fmo,sao,1p9c,2v9f,2300,2ylc,4ydc,4ydc,7740,7uio,3reo,4fmo,3reo,2300,1p9c,43w0,5x6o,4v00,cdxc,cdxc,4ruo,ee80,51mo,b32o,1klc,9l2o,53s0,9eio,2lio,2wc0,13co,6si0,13co,1bov,1imo,1imo,1mqo,-5vh,19dc,-4jc,r2o,n5c,ndo,17h0,1y50,2ey0,-4ci,2i00,7iqo,6fhc,29i0,1y50,2ey0,17h0,yzo,1i5c,2ey0,5000,2klc,29i0,1xzc,29i0,14r0,4ig0,vdmo,2i00,29i0,24dc,30ao,113c,1eo0,1xzc,17h0,ndo,u40,-s00,b400,-2ada,19rdk,-ac00,-1fuo,eeio,-1400,b400,-r2o,7iqo,-8p0,-og7,6si0,2ey0,-163,bou,ft9c,6ow0,-sgo,-o37,-2f1c,k8e8,6hso,-ndo,2c00,fqo0,-1ko0,ee5c,-1ftc,asw0,-12w0,o6dc,1mqo,-5vh,6n2o,-nwo,rs00,-8ee,2nqo,1u2o,1ktc,1bvc,203c,2iqo,29qo,1edc,7j0,1js0,29hc,3cw0,26w0,29ko,1jwo,3hk0,cqc0,l7w0,92ao,hc0,hc0,1xc0,1xc0,23a0,46k0,69u0,p6o,4j5c,23a0,4j5c,29hc,33k0,33k0,1js0,1js0,29hc,p6o,522o,522o,522o,522o,p6o0,6ps0,4j5c,5lhc,1og0,6zuo,1og0,4ds0,9v00,13g0,8qg0,8qg0,2wtc,2wtc,6sg0,dlg0,4j5c,4j5c,67mo,67mo,33tc,13g0,9pg0,9pg0,38hc,38hc,7r40,5tc0,1xs0,1xs0,c7g0,6z40,3hk0,3hk0,33tc,p6o0,qhpc,i9eo,-1tqo,355c,-bbc,3zc0,-ec0,h9s0,-1q6e,asw0,-12w0,-1mqo,gbeo,30ao,78u0,2klc,1znmo,1znmo,pxc0,pxc0,vdmo,-3cw0,15u68,-s00,b400,umo,17uo,17uo,bko,2lio,5no0,5zw8,-ll8,-56j,1ftc,-5o0,1ko0,-8ee,1z9c,2c00,-745,1z5c,-44m,15a4,-gu,4oc,-74j,-heo,4u2o,-e92,3yio,4o00,-e8a,3yao,-9k0,2nk0,-gst,2iio,-2c6,ndo,-98o,2keo,-91v,-f77,4800,-dzv,3vyo,-9fq,2mdc,-m97,7i00,66k0,6d40,-r00,-mwt,-g8t,4ig0,-c1m,3cg0,mao0,3reo,3reo,mao0,17uo,17uo,118r,24e0,24e0,xc0,xc0,23b4,3czk,118r,hwwo,hwwo,-w8u,-w8u,k280,2ia00,66k2,4oio,2iqo,1ohs,f1o0,xfpc,1pxmo,ba80,mi0,p00,10y0,r1j,pxc,eoo,e8c,fbc,fbc,1270,j3c,-1wq,f20,djc,-1cq,1fuo,-56o,-1i7,-26y,lxc,-26y,lxc,29y0,2ndq,29y0,pqo,-ast,1400,-ast,1400,-ast,1400,-ast,1400,1400,134c,w6c,-ast,umq,umo,17uo,-7i,230,umq,17uo,17uo,umo,1ftc,-2e0,1zi2o,1bs0,-29h,199c,1zi2o,-56j,12w0,zttc,-3w0,-d57,i980,-qae,10ig0,zttc,-2j7,113c,1900,29i0,-85e,pc0,-3pj,-6zy,8w0,-2cy,nlc,-w0,-p9,70i,7rb,7rb,-4i0,1xzc,126o,-2ph,u40,-1f8,sgo,-2xq,tdc,-3th,1fuo,-5ep,1i32,-7e0,-56o,-49c,16lc,-500,1e00,-2bc,n5c,r2o,21w0,-30e,-3200,cqc0,-3200,cqc0,-3200,-3200,cqc0,-3200,cqc0,cqc0,9ga0,brm0,14m0,j3c,pc0,1xzc,zk0,wqc,yq0,nlc,lao,mi0,e8c,2vpc,dw00,-2y00,dw00,-2y00,dw00,-2y00,dw00,-2y00,dw00,-2y00,7n00,7n00,-1j00,-1u00,-1j00,6d60,6d60,3ti0,-1j00,6d60,-x00,-1u00,qhtc,18g00,2gw00,-mhlm,-b8st,-b8st,18g00,-b8st,18g00,-b8st,18g00,b400,-3000,46m8,n5c,r2o,-r00,4mo0,-1900,5arh,3cdc,2s00,32k0,3c00,-wee,-r00,2s00,-llm,2800,-r00,2s00,-r00,2s00,4chc,39d0,1sco,1sco,21pc,-5no0,4fw0,16g0,16yo,7uio,3lk0,43w0,6ps0,9vs0,1p9c,3gk0,b9c0,b6yo,6ps0,4340,2jw0,1dao,fp1c,2dxc,16g0,budc,4xw0,4800,4m2o,6ps0,4800,4m2o,5x6o,2dxc,7740,1klc,1dao,1p9c,3alc,28lc,6ps0,7uio,pwo,moo,g0u,mx0,-5i0,1eo0,-5i0,mx0,-960,1270,-960,1270,17uo,17uo,1mqo,23b4,dc0,ndo,-5i0,mx0,-5i0,mx0,p00,-960,19u0,1270,-960,1270,-b00,-b00,19u0,-b00,19u0,-b00,19u0,-b00,19u0,1o00,46go,pqo,pqo,21pc,21pc,nw0,2nmo,2s00,-wee,3c00,-r00,2s00,-g77,-r00,549c,549c,2vmo,2nk0,-1i00,5k00,-1i00,5k00,-r00,2s00,2nmo,2ia0,bgi,-2r0,-5i0,mx0,-5i0,mx0,3j6b,3sko,319c,2fpc,2fpc,1p9c,1khc,19dc,1p9f,aso0,1ro0,5dc0,51mo,4fmo,43w0,2jw0,8680,4xw0,51c0,3gk0,m7g,64o0,1ro0,5w80,27tc,3s80,2zeo,2qlc,cj40,1p9c,cm2o,7740,5lhc,28lc,3alc,4m2o,53s0,9l2o,4fmo,eaw0,bou,-2cy,nlc,-w0,8w0,-163,1lai,1lai,1aju,12ac,mx0,-3hz,yzo,-19m,1w20,co0,-5oy,1kxc,-3p0,10y0,-500,17uo,-3th,126o,-290,mi0,-1us,ijo,1e00,-a000,111c0,-a000,111c0,-ahw,1xzc,-3st,pc0,-960,1270,17uo,mx0,12ac,1aju,mx0,1aju,12ac,1270,mx0,-960,mx0,6gr6,3vni,5bfo,5bfo,-a000,-a000,111c0,111c0,5k00,-1i00,-1i00,2ia0,5k00,24ko,1aju,7n00,19u0,19u0,19u0,17uo,1aju,134c,134c,-6se,35t6,199c,5b9c,-sot,10uo,10uo,-h2l,5eg0,ndo,-3i9,19s0,-6v7,6aao,-xy0,35c0,772o,-12v0,-t60,-h00,-cn7,20s0,-ax0,tdc,2cao,-4em,2nmo,-ece,111c0,-a000,111c0,-a000,5r9c,-v37,tdc,-4em,2ndq,1i5c,-84e,2iqo,11nk,mx0,mx0,3k6o,99c0,-2i00,99c0,-2i00,-56j,5k00,-1i00,5k00,-1i00,1ftc,8mw0,38o0,moo,w1o,165c,xc0,-ece,21pc,2ndq,2ia0,2nmo,5r9c,74dc,3nk0,3nk0,6n2o,xc0,7y4,-16x,-zv0,50k0,111c0,-a000,111c0,-a000,319c,3sko,4eyw,36l0,36l0,36l0,agjk,-960,mx0,1270,23b4,u8w,mx0,-5000,iio0,-5000,iio0,mx0,mx0,17uo,17uo,910,21pc,21pc,4eyw,qhtc,1040,1bov,21pc,10uo,l00,1bs0,34yo,2iqo,mx0,-dio0,-dio0,2nk0,549c,5xg0,cje0,-17uo,8w0,nlc,2c10,hhu,qqi,2c10,2c10,pc0,1p9c,r2o,10y0,1fuo,2fpc,2fpc,umq,1khc,19dc,ijo,126o,1900,n9x,n9x,nlc,1xzc,sgo,lxc,lxc,n5c,-tq0,-28xc,bgi,vwm,vwm,7rb,7rb,bgi,bgi,bgi,bgi,1xzc,co0,ijo,mi0,17uo,17uo,bso,12ac,12ac,mx0,mx0,mx0,mx0,2fpc,mx0,17uo,mx0,1aju,17uo,17uo,umo,umq,2wz,-ai,1sco,1sco,zbr4,222o0,1aju,-2bt,-2c6,1900,-4i0,17uo,17uo,ndo,-1bs0,d9s0,21w0,1e00,kdi,7s00,2nk0,-9k0,22co,-1ftc,4olc,-guy,ee5c,1wr0,-f1o,17uo,-2ia0,-xc0,1aju,12ac,mx0,12ac,mx0,17uo,17uo,mx0,1bvc,203c,2iqo,b90,14r0,-xe,ijo,-19m,-16h,-k9,nlc,-w0,hs0,yzo,9jo,pc0,u40,-1i7,djc,-od,bko,-ku,p00,-190,1i32,1kxc,-2uh,-h7,-81,80f,4gc,-6m,3o6,-1qze,1z5o,1960,-1bs0,-l00,-10uo,-1bov,-1040,-21pc,j3c,ijo,2gsy,2gsy,8go,nj8,nj8,bou,r2o,djc,j3c,mi0,co0,10f1,co0,ijo,kdi,mi0,j3c,f20,djc,bko,p00,ih0,pxc,eu6,e8c,14sc,rw0,29hc,2j1c,1e2o,xuo,f40,1geo,29ko,t4c,yw0,hg0,kn2,8w0,7uf,bso,kn2,co0,d2o,cex,esu,sgo,r1j,10y0,ci0,eu6,djc,bko,99u,kdi,10f1,j3c,f20,mi0,yw0,1m8o,1jwo,14sc,hg0,13g0,1vpc,2s5c,29hc,1js0,p6o,2wtc,21w0,2s00,u40,24dc,1900,29i0,1ncq,1ygo,z8c,1aju,18eh,-22r0,s8o,18eh,10y0,f20,1b2g,1b2g,4xlx,3wxc,afk,21f5,1nse,ijo,mi0,pxc,10f1,10y0,bso,z8c,oro,oro,bou,nj8,z8c,18eh,18eh,pc0,6fhc,r2o,24dc,2i00,1kxc,s20,1ys0,ke6,ek6,d3o,mrc,6z0,29i0,co0,-ijo,6fyp0,6fyp0,16tr,6sii,-265a,-265a,6sii,-q7l,5yhj,-q7l,5yhj,29qo,1381,nj8,nj8,z8c,e8c,eu6,10y0,113c,co0,4g0,13gv,sze,pc0,mi0,6yo0,90w0,iz0,-52jd,b1oo,90w0,co0,ijo,mi0,11y0,djc,r1o,pxc,32y1,1tah,32y2,hs0,5wu,1tah,nlc,co0,226o,16ac,10y0,5zu,-5cmi,ey25,-4213,8u5c,2s00,23w0,1eo0,479c,4ekv,1avs,-1opx,40wz,81tz,g3ny,-1opx,40wz,-6qvo,-3dfu,-2j6l,g3ny,4ekv,-6qvo,5z82,-2j6l,-251t,35uo,5reo,5k00,30ao,2bk0,2cko,6kt,35uo,4ia0,3hc0,30ao,2tc0,bzo,bto,-atew,nke8,-a4bi,o5hx,6kt,o5hx,-a4bi,3p4u,39iv,39iv,81tz,3p4v,-3dfu,11tc,co0,113c,16ac,mi0,1i3c,u40,kw0,p00,kdc,nlc,iz0,nfw,1lyt,-16bh,2k74,2k74,-oad,13gv,-oad,1lyt,-oad,1lyt,-oad,1lyt,-c56,sze,-16bh,13gv,r2o,puc,puc,-2j6l,4ekv,-2j6l,2e38,-utj,4ekv,-3dfu,4twe,-20v4,c2qy,-525r,81tz,bs74,-5epg,35uo,ey25,-5cmi,2run,-3dfu,81tz,s4o,e2c,-ap91,tw4b,-28yk,5d7z,5d7z,-28yk,5d7z,-28yk,2pxq,1ukf","R":"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1ohl,128h,2iu1,2iu1,24o8,3vdx,2owj,2iu1,1edg,1ccm,7kk0,2ow0,3vdc,51pc,f56e,2iuo,36o0,49c0,5lhc,28qo,3cyo,1eeg,23lo,3gg0,3gg0,f56e,u6o,u6o,1uz4,1mkc,25dk,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,156m,13gq,0,0,0,0,27o9,0,0,pph,0,2djr,0,j8k,0,j8k,0,16tf,0,2djr,0,pph,2j4y,1fey,0,153j,0,0,1n8m,0,156m,0,wi0,257j,0,2580,0,1t6o,0,0,1n8o,2adc,0,2580,0,1feo,0,156o,0,16tc,0,2580,13go,1t1c,ppc,vq0,0,0,2a80,0,0,ppc,0,0,vq0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,whc,whc,qbc,165c,qbc,165c,19a0,1ebo,1ebo,19a0,1hn4,1aww,1ee0,1ag0,19fc,19fc,1cdc,u9c,12co,u9c,1hn4,1ebo,1ebo,1cgo,11c0,1aww,11c0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,19fc,19fc,1xpc,12co,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36o0,7kk0,2oo0,2iuo,3cyo,2oo0,3vdc,51pc,1mkc,u6o,u6o,f56e,f56e,3gg0,1uz4,23lo,1eeg,25dk,28qo,49c0,5lhc,2ow0,3gg0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,c3c,0,mpo,0,mhc,mhc,fq8,fq8,0,0,reo,0,gfo,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,ezk0,0,0,3280,2t60,0,0,0,0,0,2mdc,0,4kg0,0,0,ec6,0,0,0,0,4kg0,9zvk,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,25nk0,25nk0,94pc,0,c3c,0,0,0,0,0,0,0,0,0,0,0,4cq,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1cc0,2iuo,0,0,0,0,0,0,w5c0,w5c0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,634w,0,0,0,16tf,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,634w,0,0,0,0,0,bpj0,9kg0,4l5c,2a80,2a80,4l5c,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,gfo,reo,fq8,fq8,mhc,mhc,7kk,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,ocjk,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9d80,nlc,nlc,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12zrk,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,18y2,16nc,1o8w,10k0,xgxv,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,111c0,74dc,1qcjq,3zg0,144g0,111c0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,ac00,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3cw0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5no0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,dio0,dio0,0,0,0,0,17uo,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,tq0,28xc,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,f1o,0,2ia0,xc0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1qze,0,0,1bs0,l00,10uo,1bov,1040,21pc,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,22r0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,ijo,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0","U":"1c,1c,1c,1c,1c,1c,6,6,6,6,c,c,c,6,6,6,6,1c,1c,6,6,6,6,c,i,6,6,2o,2o,1c,1c,1c,o,1c,1c,c,c,c,c,o,1c,4,40,4,1c,40,5c,1c,6,6,6,6,6,o,o,c,c,6,1o,1o,1o,1o,o,o,o,o,c,c,c,c,c,c,c,c,c,6,c,6,6,6,6,6,6,8,6,6,1c,1c,1c,1c,1c,1c,1c,1c,1c,o,o,1c,6,1c,6,1c,1c,1c,1c,1c,1c,1c,1c,1c,1c,1c,1c,o,1c,1c,1c,1c,o,1c,a,a,2o,1c,1c,1c,o,1c,40,40,2o,1c,2o,1c,40,2o,2o,1c,40,2s,2s,1c,14,i2,i2,28,14,1o,14,14,14,5c,2o,28,1c,1c,1c,1c,1c,1c,1c,1c,1c,1c,-1c,-1c,-1c,-1c,-1c,-1c,-1c,-1c,-1c,-1c,-40,-1c,-1c,-2o,-i2,-1c,-40,-2o,-5c,-14,-2o,-14,-1o,-28,-28,-i2,-14,-14,-2s,-2s,-14,2o,2o,1c,1c,2o,2o,40,1c,2o,2o,1c,1c,40,a,5c,a,a,f,k,k,1t,1t,4,4,a,a,c0,2o,1c,o,1c,4g,4g,u,u,3c,o,3c,o,o,1c,1c,1c,o,o,o,o,1c,o,1c,o,1c,2o,o,1c,1c,1c,o,2o,1c,o,2o,40,40,1c,2o,1c,1c,1c,1c,1c,o,o,o,o,o,o,-o,-o,g,6,6,6,-4g,6,c,-o,c,-3c,3,-u,3,-u,g,-1c,1c,-3c,1c,-o,-4g,-1c,1c,-1c,1c,o,-o,o,-o,1c,-1c,-1c,1c,-1c,1c,-1c,6,o,-o,-1c,1c,-1c,1c,-1c,1c,-o,6,-1c,1c,-1c,-o,-2o,-o,-o,1c,2o,-2o,2o,6,-o,6,6,-o,6,2o,2o,2o,o,o,o,1c,o,o,1c,o,o,o,1o,1o,28,28,o,1o,1o,1o,1o,28,28,-o,-o,-o,-o,-o,-o,-1o,-1o,-1o,-1o,-28,-28,-1c,-o,-o,-o,-1c,-o,-o,-o,-28,-1o,-1o,-o,-o,-28,-o,8,6,8,6,6,6,1c,1c,o,o,o,6,6,6,6,6,6,6,8,8,6,6,6,6,1c,1c,c,1c,-o,-o,-o,-o,i,i,1c,1c,1c,1c,1c,1c,1c,1c,1c,1c,i,i,i,i,c,40,o,g,g,c,1c,1c,1c,1c,o,o,1c,1c,1c,40,1c,40,a,a,a,5,5,5,a,u,5,k,k,3,5,5,3,5,f,f,5,3,5,3,i,6,1c,1c,o,1c,1c,i,6,i,i,i,i,6,6,6,i,8,8,8,6,c,6,c,6,6,1c,1c,1c,1c,1c,6,o,6,1c,6,6,1,1,6,6,c,c,c,o,c,1c,1c,1c,1c,1c,3,1c,1c,1c,3,c,dc,dc,dc,dc,dc,dc,dc,dc,dc,dc,6,6,6,1c,1c,6,c,i,1c,-40,-40,-2o,-1c,-2o,-2o,-1c,-2o,-a,-4,-4,-1t,-1t,-k,-a,-f,-a,-a,-a,-2o,-5c,-1c,-k,c,2,c,c,c,c,c,2,6o,1c,1c,1c,1c,b4,6,4,c,4,4,c,4,6,c,c,c,c,c,c,3,3,c,6o,1o,28,u,u,3c,2o,1c,1c,1c,o,1c,1c,o,1c,o,1c,1c,o,2o,1c,1c,4,4,6,2,2,2,2,a,k,a,k,a,6,a,a,2o,1c,5,5,5,2o,5,5,a,5,a,5,5c,40,2o,2o,2o,2o,2o,40,40,40,c,4,c,-c,c,-c,4,-4,-4,-4,-4,4,6,-6,6,-6,4,28,1c,i,1c,1c,o,1c,i,1c,i,i,c,c,6,6,u,u,i,o,o,2o,1c,5c,40,40,1c,i,40,b4,b4,30,30,30,c,c,i,30,i,1k,i,6,6,o,1,2,3,3,3,70,70,1,2,1,1,1,1,1,3,1,1,1,1,g,6,6,xc,xc,io,7i,7i,io,5,10,10,1c,5,a8,3u,3u,40,40,40,68,a8,dc,40,3c,1,4,2,2,2,2,2,2i,2i,1c,1c,2o,2s,5i,6o,5i,o,o,8,o,o,3c,8,6,8,1c,1c,6,1c,c,c,6,6,6,1,1,1,1c,1,o,o,o,o,o,o,5,5,c,c,c,c,c,o,-2o,i,o,-o,-i,a,10,10,o,o,-o,2o,-10,i,i,-i,i,o,10,28,-10,-28,i,23,16,16,23,i,9c,86,86,9c,4g,o,28,7i,37k,w,1,1,1c,1c,1c,1,1,1,1c,40,1c,2o,5c,2o,2o,80,1c,2o,6o,2o,4o,20,1c,20,1c,1c,40,1c,2o,1c,20,40,1c,8w,6o,1c,o,6,8,6,8,1c,1c,1c,o,o,1c,1c,1c,6,6,6,6,6,6,6,6,1c,86,86,1s,-h0,-h0,-3c,b4,-c,8w,u,i,c,a,a,6,6,c,8,c,-1,1c,1c,1c,o,o,1c,u,1c,1c,u,u,u,1c,1c,40,80,40,2s,c,c,c,c,c,c,c,6,6,6,6,c,6,6,6,6,28,-1c,-1c,u,1o,u,1o,2s,2s,-70,-70,i,i,c,1,1,1,1,1,1,o,c,c,6,6,6,6,1c,o,1c,c,6,c,g,6,-28,28,28,1c,-1c,1c,8w,1c,1c,o,1c,6,6,2o,o,1c,1c,o,o,1c,1c,6,6,6,6,1c,6,1c,1c,1c,o,1c,1c,c,c,28,c,c,c,c,80,6,d,1c,1c,1c,1c,2o,40,6,6,2o,2o,o,h,1c,2o,1c,c,c,c,10,-28,6,6,4,3,3,-23,-23,-16,-i,-i,-16,16,16,23,i,i,23,1c,o,1c,6,o,6,6,6,6,8,6,-6,-6,-4,-4,-4,-4,-4,1c,o,o,1c,1c,c,c,c,c,5c,2o,o,2o,o,2o,1c,2o,c,1c,-8w,1,1,1,c,1,1,1,1,1,0,1c,c,c,c,c,c,c,c,c,2o,o,o,1c,6o,1c,1c,4,2,c,8,-1o,-6,-6,o,1c,6,1c,2,2,1c,1c,2o,1g,0,c,c,c,c,c,6,6,6,6,c,a,4,c,c,c,c,c,c,8,6,6,6,6,6,6,c,1c,o,o,o,o,6,6,c,c,c,g,1,1c,o,1c,o,o,6,6,c,1c,1c,o,u,1c,10,1c,10,c,c,c,4g,o,o,u,10,c,1c,1c,1c,1c,u,u,i,i,6o,0,6o,1c,0,1c,0,2o,0,i,0,c,0,6o,4,8,0,0,46,0,7e,0,0,6o,o,o,o,8,6,6,8,6,o,6,6,6,6,a,a,1c,2o,40,1c,c,c,c,14,6,g,g,6,6,6,6,6,0,6,0,c,0,c,0,c,0,c,0,1c,w,c,c,c,c,c,c,1c,1c,o,c,c,i,o,i,40,o,1c,1c,19,4u,2o,0,6,6,6,0,6,0,6,8,8,0,0,c,6,0,0,6,6,0,c,0,c,0,c,0,c,0,c,0,c,0,c,0,6,0,o,0,o,0,6,0,6,0,1c,1c,1c,1c,6,6,6,6,8,8,14,1o,a,0,c,c,6,0,6,0,8,c,dw,6,9,f,p,8,a,f,a,u,6,c,6,6,6,6,6,10,4,5,0,c,0,c,c,c,0,6,0,0,0,6,0,6,1c,0,1c,0,6,0,6,0,0,c,0,c,0,0,c,c,o,c,0,1c,0,1c,o,o,0,0,0,6,0,c,0,6,0,6,c,0,2o,o,1c,0,0,o,0,0,i,0,i,0,-dw,2o,2o,2o,2o,o,o,2o,2o,2o,2o,o,2o,2o,2o,2o,2o,o,2o,i,i,2o,1c,1c,1c,1c,1c,1c,1c,1c,o,o,i,o,2o,10,10,10,1c,10,1c,1c,1c,1c,1c,1c,o,o,o,o,o,2o,2o,2o,2o,2o,2o,2o,2o,o,1c,0,0,0,6,0,o,0,6,0,6,0,1c,2o,0,f,0,1c,6,0,0,0,6,c,6,40,i,u,u,40,40,40,i,40,40,40,0,0,0,i,0,20,6,i,6,0,3,0,o,0,o,o,0,c,0,o,0,o,0,3x,0,o,3x,0,0,80,0,o,o,c,c,c,c,o,1c,0,o,0,o,0,0,1c,o,o,o,1c,6,6,6,6,c,2o,2o,2o,2o,2o,2o,2o,o,o,o,o,0,0,dc,3f,0,dc,6,6,6,0,6,0,g,6,g,6,6,6,6,6,o,o,o,o,o,o,o,o,0,o,0,o,0,0,o,c,-1c,-o,-o,-1c,-dc,2o,40,2o,6o,dc,dc,6o,c,2o,1c,o,1d,o,i,i,i,c,i,1c,c,o,c,g,20,c,c,1c,3c,c,c,c,c,70,2o,2o,ee,0,1c,o,0,1c,0,1c,0,-6o,-2o,-dc,-40,-dc,-6o,6o,2o,40,6o,dc,dc,40,40,40,40,40,40,40,40,40,40,9c,40,40,40,9c,9c,9c,9c,9c,9c,40,o,2o,20,2o,i,6,6,6,c,o,o,6,6,o,6,o,i,c,c,6,c,1c,c,c,6,c,0,f,c,c,c,c,o,1c,0,1c,0,0,0,1o,0,1o,0,80,0,5c,0,5c,6o,0,6o,0,0,5c,80,0,k,0,k,0,0,k,k,0,k,0,k,0,0,o,o,o,1o,3c,2o,k,3c,0,14,1c,2o,2o,2o,2o,2o,2o,2o,2o,2o,2o,2l,40,2o,2o,2o,2o,2o,2o,2o,2o,40,2o,40,5c,9c,6o,6o,5c,5c,5c,6o,5c,9c,80,6o,28,40,k,20,k,c,c,c,1c,0,o,0,o,o,k,1o,1o,3c,0,1c,6o,6o,o,1o,3c,1o,c,1c,3c,2o,2o,o,o,o,c,40,6o,1c,o,1c,2o,o,1c,o,1o,k,o,0,20,0,9q,-20,0,6o,0,5c,0,6o,0,0,20,3c,0,a,dc,5c,0,0,0,4g,5k,0,1c,dc,0,dc,0,dc,0,dc,1c,0,6o,0,50,0,1c,1c,1c,o,o,1c,1c,14,c,1c,1c,2o,2o,o,o,2o,20,3c,2o,10,10,40,40,3c,6o,a0,k,1c,3c,1c,1c,2o,2o,1c,1c,1c,k,1c,1c,1c,1c,k0,5c,1c,4g,1c,5k,1c,5c,c0,1c,40,40,1c,1c,40,40,1c,1c,2o,2o,1c,1c,40,40,1c,1c,5c,40,1c,1c,9c,5c,2o,2o,1c,k0,6o,xc,0,3c,0,40,0,g0,0,dc,0,0,dc,2o,a0,2o,bo,bo,4o,4o,6o,-2o,8w,0,20,6,6,6,c,28,60,5k,0,0,1c,0,1c,0,1c,1c,0,1c,0,k,0,4,0,0,2o,0,2o,2o,0,2o,0,2o,0,2o,0,k,0,1c,0,0,40,0,1c,0,2o,0,40,40,40,0,0,0,40,0,2o,c0,2o,2o,c0,6,6,6,c,c,6,6,g,w,6,2x,2x,0,0,6o,u0,1k,1k,o,g,50,b4,xc,80,c,c,c,c,c,c,c,3,3,6,c,0,c,c,0,o,0,0,0,3,0,3,i,o,i,6,0,c,0,c,0,c,0,c,c,6,6,0,6,6,6,0,1,6,6,6,6,1c,0,dc,1c,0,1c,dc,0,1c,5u,0,0,3i,0,70,5u,0,o,o,o,0,o,0,0,o,0,o,0,0,6,1,1,0,o,o,0,o,0,o,0,o,0,o,0,o,0,0,0,o,0,o,0,o,o,o,0,0,3c,0,3c,0,0,3c,0,3c,3c,2i,2i,10,c,o,o,2o,s,10,o,c,c,c,1c,46,0,46,0,46,0,46,0,46,0,20,20,0,0,0,1o,10,10,0,1o,0,0,6o,dc,qo,0,0,0,dc,0,dc,0,dc,3c,0,w,o,o,0,u,0,1c,14,i,i,10,0,0,u,0,o,0,u,0,u,o,i,c,c,c,-60,40,40,1c,2o,1c,40,40,40,2o,40,ao,6o,40,2o,40,1c,5c,2o,40,ao,20,40,5c,40,40,5c,5c,2o,2o,5c,1c,2o,1c,1c,40,2o,o,c,6,6,0,1c,0,6,0,6,0,6,6,6,1c,g,10,k,0,6,0,6,c,0,c,6,0,6,0,0,c,0,c,0,c,0,c,i,1e,6,6,c,c,o,2o,u,0,10,0,u,0,0,u,u,2o,2o,0,1o,0,1o,0,u,2o,u,3,0,0,6,0,6,w,u,o,c,c,c,c,c,c,40,60,60,5c,2o,40,40,5c,20,30,40,k,40,60,k0,1c,40,3c,2o,e0,2o,dc,2o,3c,1c,1c,5c,80,9c,2o,9c,a,0,o,0,o,0,f,f,6,6,6,0,c,0,i,c,0,1c,0,c,0,6,0,o,0,c,0,c,o,0,6o,0,6o,0,o,0,o,0,6,6,6,6,6,6,6,6,6,6,0,6,u,i,u,u,0,0,6o,6o,10,0,0,u,10,c,6,20,c,c,c,6,6,6,6,0,2l,1c,5c,0,6,6,0,6o,k,0,40,0,6o,0,2o,6o,0,0,0,0,1c,0,o,1c,0,2o,0,6o,0,6o,0,5c,0,o,0,o,1c,0,o,8,6,6,1c,1o,0,1o,0,0,10,0,10,0,1c,80,40,c,c,o,a,0,c,o,u,2o,5c,2o,i,i,6o,a,p,0,0,1o,6o,0,6o,0,o,u,14,u,u,u,28,0,6,6,g,8,6,0,3c,0,3c,6,6,6,6,3,c,c,14,6o,c,c,c,6,c,1c,o,o,6,-3c,-3c,2o,u,40,46,-6,o,o,m,6,7,m,m,o,c,o,c,o,c,c,6,c,c,c,o,o,3,3,o,o,o,3,3,o,-5,-1c,3,5,5,1,1,3,3,3,3,o,c,c,c,6,6,c,6,6,6,6,6,6,c,6,6,6,6,6,6,6,6,1,0,c,c,8w,m8,6,0,0,o,0,6,6,k,0,dc,o,o,6,2o,2o,0,o,0,2o,0,dc,i,-5,6,-u,-a,6,6,6,6,6,6,6,6,o,o,1c,6,c,0,c,0,0,0,o,0,1c,c,6,o,o,0,c,0,c,0,c,0,o,1c,0,0,0,3,3,0,3,-o,1o,10,-1c,-c,-6,-c,-c,-c,c,c,c,c,6,6,6,a,o,c,c,c,c,c,c,c,6,c,c,c,c,c,c,6,c,c,c,c,o,1c,o,o,o,c,o,o,c,o,c,a,o,2,c,a,c,2,2,2,o,c,c,6,c,c,c,6,6,c,c,c,c,o,o,o,c,c,1c,1c,1c,1c,1c,k,1c,o,1c,o,1c,o,o,1c,c,6,6,6,-1g,6,6,c,c,c,c,o,o,5,1c,1c,c,c,c,c,c,c,6,c,c,a,6,6,6,6,o,6o,o,1c,1c,1c,o,20,6,6,6,6,6,o,c,-c,k,k,o,u,0,0,u,0,1o,0,1o,1c,6,6,6,6,c,c,c,o,c,c,6,6,o,c,80,80,c,0,46,80,c,c,c,o,c,c,c,k,a,k,1c,3,a,o,c,1c,c,c,3,0,2s,0,3c,1c,1c,1c,1c,i,14,0,u,1o,3c,0,u,0,0,0,3c,i,0,14,0,0,2o,2o,2o,2o,2o,o,1,2o,20,40,2o,2o,6,6,0,8w,0,50,1,50,0,o,i,i,1o,o,0,c,c,o,c,c,o,o,o,c,c,o,c,k,c,0,w,w,0,6,0,c,0,c,0,c,0,6,0,6,o,6,6,0,i,0,g,0,i,0,10,0,2i,0,1o,4g,0,2o,2s,0,i,0,1o,o,c,0,5k,0,14,14,0,14,0,f,c"}</script>
+<script>
+
+/* ============ datos ============ */
+const RAW = JSON.parse(document.getElementById('DATA').textContent);
+const dec = s => s.split(',').map(v => parseInt(v, 36));
+const CAT = RAW.cat, CLI = RAW.cli, CAN = RAW.can, ZON = RAW.zon, VEN = RAW.ven, PN = RAW.pn, PC = RAW.pc;
+const PAL = ['#E3256B', '#1CA9C9', '#7B57A8', '#FF8A3D', '#1F9E7A'];
+const CATC = RAW.catc || [];
+const catColor = i => CATC[i] || PAL[i % PAL.length];   // color fijo por categoría
+
+const _d = dec(RAW.D);
+const N = RAW.n;
+const R = {
+  di: new Int32Array(N), c: dec(RAW.C), p: dec(RAW.P), k: dec(RAW.K),
+  z: dec(RAW.Z), v: dec(RAW.V), f: dec(RAW.F), n: dec(RAW.N), r: dec(RAW.R), u: dec(RAW.U),
+  y: new Int16Array(N), m: new Int8Array(N), dd: new Int8Array(N), cat: new Int8Array(N)
+};
+const BASE = Date.parse(RAW.base + 'T00:00:00Z');   // UTC: el cambio de hora no debe correr fechas
+let acc = 0;
+for (let i = 0; i < N; i++) {
+  acc += _d[i]; R.di[i] = acc;
+  const dt = new Date(BASE + acc * 86400000);
+  R.y[i] = dt.getUTCFullYear(); R.m[i] = dt.getUTCMonth(); R.dd[i] = dt.getUTCDate();
+  R.cat[i] = PC[R.p[i]];
+}
+const CUT = new Date(Date.parse(RAW.cut + 'T00:00:00Z'));
+const CY = CUT.getUTCFullYear(), PY = CY - 1, CM = CUT.getUTCMonth(), CD = CUT.getUTCDate();
+const LASTDAY = new Date(CY, CM + 1, 0).getDate();
+const PARTIAL = CD < LASTDAY;
+const MES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const MESL = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const YEARS = [...new Set(Array.from(R.y))].sort();
+
+/* ============ formato chileno ============ */
+const nf = (v, d = 0) => (isFinite(v) ? v : 0).toLocaleString('es-CL', { minimumFractionDigits: d, maximumFractionDigits: d });
+function money(v) {
+  const a = Math.abs(v), s = v < 0 ? '-' : '';
+  if (a >= 1e6) return s + '$' + nf(a / 1e6, a / 1e6 >= 100 ? 0 : 1) + ' MM';
+  if (a >= 1e4) return s + '$' + nf(a / 1e3, 0) + ' M';
+  if (a >= 1000) return s + '$' + nf(a / 1e3, 1) + ' M';
+  return s + '$' + nf(a, 0);
+}
+const money0 = v => (v < 0 ? '-' : '') + '$' + nf(Math.abs(v), 0);
+const pct = (v, d = 1) => (v > 0 ? '+' : '') + nf(v, d) + '%';
+const pct0 = (v, d = 1) => nf(v, d) + '%';
+function yoy(cur, prev) {
+  if (prev < 0) return { t: '—', c: 'nt', v: null };                      // base negativa: no comparable
+  if (!prev) return cur > 0 ? { t: 'nuevo', c: 'nt', v: null } : { t: '—', c: 'nt', v: null };
+  const v = (cur / prev - 1) * 100;
+  return { t: pct(v), c: v >= 0 ? 'up' : 'dn', v };
+}
+const esc = s => String(s).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+const ymKey = (y, m) => y * 12 + m;
+
+/* ============ filtros y agregación ============ */
+const F = { canal: -1, zona: -1, mes: null };
+let IDX = [];
+function applyFilter() {
+  IDX = [];
+  for (let i = 0; i < N; i++) {
+    if (F.canal >= 0 && R.k[i] !== F.canal) continue;
+    if (F.zona >= 0 && R.z[i] !== F.zona) continue;
+    IDX.push(i);
+  }
+}
+const inYtd = i => (R.m[i] < CM) || (R.m[i] === CM && R.dd[i] <= CD);   // tramo comparable a la fecha de corte
+const isCur = i => R.y[i] === CY, isPrev = i => R.y[i] === PY;
+
+function sum(pred, field) { let s = 0; for (const i of IDX) if (pred(i)) s += R[field][i]; return s; }
+function uniq(pred, field) { const s = new Set(); for (const i of IDX) if (pred(i)) s.add(R[field][i]); return s.size; }
+
+function group(pred, keyFn) {
+  const m = new Map();
+  for (const i of IDX) {
+    if (!pred(i)) continue;
+    const k = keyFn(i);
+    if (k === null || k === undefined) continue;
+    let o = m.get(k);
+    if (!o) { o = { k, n: 0, u: 0, f: new Set(), c: new Set(), last: -1 }; m.set(k, o); }
+    o.n += R.n[i]; o.u += R.u[i]; o.f.add(R.f[i]); o.c.add(R.c[i]);
+    if (R.di[i] > o.last) o.last = R.di[i];
+  }
+  return m;
+}
+const byVal = (a, b) => b.n - a.n;
+const dstr = di => { const d = new Date(BASE + di * 86400000); return String(d.getUTCDate()).padStart(2, '0') + '-' + MES[d.getUTCMonth()] + '-' + String(d.getUTCFullYear()).slice(2); };
+
+/* meses con movimiento (orden ascendente) */
+function monthsWithData() {
+  const s = new Set();
+  for (let i = 0; i < N; i++) s.add(ymKey(R.y[i], R.m[i]));
+  return [...s].sort((a, b) => a - b);
+}
+const ALLM = monthsWithData();
+
+/* ============ helpers SVG ============ */
+const SVG = (vb, inner, extra = '') => `<svg viewBox="${vb}" preserveAspectRatio="xMidYMid meet" ${extra}>${inner}</svg>`;
+const T = t => `<title>${esc(t)}</title>`;
+function txt(x, y, s, o = {}) {
+  return `<text x="${x}" y="${y}" fill="${o.fill || 'var(--muted)'}" font-size="${o.size || 10}" font-weight="${o.w || 500}"
+    text-anchor="${o.a || 'start'}" class="${o.mono ? 'n' : ''}" ${o.ls ? `letter-spacing="${o.ls}"` : ''}>${esc(s)}</text>`;
+}
+let _cv;
+function textW(s, font) {
+  if (!_cv) _cv = document.createElement('canvas').getContext('2d');
+  _cv.font = font; return _cv.measureText(s).width;
+}
+function niceMax(v) {
+  if (v <= 0) return 1;
+  const e = Math.pow(10, Math.floor(Math.log10(v))), f = v / e;
+  return (f <= 1.2 ? 1.2 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 4 ? 4 : f <= 5 ? 5 : f <= 8 ? 8 : 10) * e;
+}
+function axisTicks(max, n = 4) { const out = []; for (let i = 0; i <= n; i++) out.push(max * i / n); return out; }
+function shortMoney(v) {
+  const a = Math.abs(v), s = v < 0 ? '-' : '';
+  if (a >= 1e6) return s + nf(a / 1e6, a / 1e6 >= 100 ? 0 : 1) + ' MM';
+  if (a >= 1e3) return s + nf(a / 1e3, 0) + ' M';
+  return s + nf(a, 0);
+}
+function mix(hex, w) { // hex sobre blanco, w = 0..1 intensidad
+  const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+  const f = c => Math.round(255 + (c - 255) * w);
+  return `rgb(${f(r)},${f(g)},${f(b)})`;
+}
+const kpi = (label, val, foot, color) =>
+  `<div class="kpi" style="--k:${color}"><div class="lab">${esc(label)}</div><div class="val">${val}</div><div class="foot">${foot}</div></div>`;
+const chip = o => `<span class="chip ${o.c}">${esc(o.t)}</span>`;
+
+/* ============ barras agrupadas por mes (2 años) ============ */
+function monthBars(seriesPrev, seriesCur, opt = {}) {
+  const W = 1000, H = opt.h || 300, ml = 54, mr = 12, mt = 16, mb = 30;
+  const iw = W - ml - mr, ih = H - mt - mb;
+  const max = niceMax(Math.max(...seriesPrev, ...seriesCur, 1));
+  const cw = iw / 12, bw = Math.min(22, cw * .32), gap = 4;
+  let s = '';
+  axisTicks(max).forEach(t => {
+    const y = mt + ih - (t / max) * ih;
+    s += `<line x1="${ml}" x2="${W - mr}" y1="${y}" y2="${y}" class="mline" ${t === 0 ? '' : 'stroke-dasharray="2 4"'}/>`;
+    s += txt(ml - 8, y + 3.5, opt.unit === 'u' ? nf(t) : shortMoney(t), { a: 'end', size: 9.5, mono: 1 });
+  });
+  for (let m = 0; m < 12; m++) {
+    const cx = ml + cw * m + cw / 2;
+    const vs = [{ v: seriesPrev[m], c: '#B9C2CD', y: PY }, { v: seriesCur[m], c: opt.color || 'var(--magenta)', y: CY }];
+    vs.forEach((o, j) => {
+      if (!o.v || o.v <= 0) return;
+      const h = Math.max(1, (o.v / max) * ih), x = cx - bw - gap / 2 + j * (bw + gap);
+      s += `<rect x="${x}" y="${mt + ih - h}" width="${bw}" height="${h}" rx="2.5" fill="${o.c}">${T(`${MESL[m]} ${o.y} · ${opt.unit === 'u' ? nf(o.v) + ' un' : money0(o.v)}`)}</rect>`;
+    });
+    s += txt(cx, H - 10, MES[m], { a: 'middle', size: 10, fill: 'var(--muted)' });
+  }
+  return SVG(`0 0 ${W} ${H}`, s, `style="max-height:${H}px"`);
+}
+
+/* ============ waterfall YoY ============ */
+function waterfall(prevTot, deltas, curTot) {
+  const W = 1000, H = 320, ml = 8, mr = 8, mt = 34, mb = 46;
+  const ih = H - mt - mb, n = deltas.length + 2, cw = (W - ml - mr) / n, bw = Math.min(78, cw * .6);
+  let run = prevTot, lo = Math.min(0, prevTot, curTot), hi = Math.max(prevTot, curTot);
+  deltas.forEach(d => { const a = run, b = run + d.v; lo = Math.min(lo, a, b); hi = Math.max(hi, a, b); run = b; });
+  const max = niceMax(hi * 1.08), min = lo < 0 ? -niceMax(-lo * 1.15) : 0;
+  const sy = v => mt + ih - ((v - min) / (max - min)) * ih;
+  let s = `<line x1="${ml}" x2="${W - mr}" y1="${sy(0)}" y2="${sy(0)}" class="mline"/>`;
+  run = prevTot;
+  const bars = [{ lab: `YTD ${PY}`, v: prevTot, type: 'tot', c: '#8A95A3' }]
+    .concat(deltas.map(d => ({ lab: d.lab, v: d.v, type: 'd', c: d.c })))
+    .concat([{ lab: `YTD ${CY}`, v: curTot, type: 'tot', c: 'var(--magenta)' }]);
+  let cursor = 0;
+  bars.forEach((b, i) => {
+    const cx = ml + cw * i + cw / 2, x = cx - bw / 2;
+    let y0, y1, val = b.v, tip;
+    if (b.type === 'tot') { y0 = sy(0); y1 = sy(b.v); cursor = b.v; tip = `${b.lab}: ${money0(b.v)}`; }
+    else { const from = cursor, to = cursor + b.v; y0 = sy(from); y1 = sy(to); cursor = to; tip = `${b.lab}: ${b.v >= 0 ? '+' : ''}${money0(b.v)}`; }
+    const top = Math.min(y0, y1), h = Math.max(1.5, Math.abs(y1 - y0));
+    const fill = b.type === 'tot' ? b.c : b.c;
+    const op = b.type === 'tot' ? 1 : (b.v >= 0 ? .95 : .45);
+    s += `<rect x="${x}" y="${top}" width="${bw}" height="${h}" rx="2.5" fill="${fill}" opacity="${op}">${T(tip)}</rect>`;
+    if (b.type !== 'tot' && b.v < 0) s += `<rect x="${x}" y="${top}" width="${bw}" height="${h}" rx="2.5" fill="none" stroke="${fill}" stroke-width="1.4" stroke-dasharray="3 2.5"/>`;
+    const lv = b.type === 'tot' ? shortMoney(b.v) : (b.v >= 0 ? '+' : '') + shortMoney(b.v);
+    s += txt(cx, top - 7, lv, { a: 'middle', size: 10.5, w: 600, mono: 1, fill: b.type === 'tot' ? 'var(--ink)' : (b.v >= 0 ? 'var(--pos)' : 'var(--neg)') });
+    const words = b.lab.split(' ');
+    let lines = [b.lab];
+    if (b.lab.length > 13) { const h2 = Math.ceil(words.length / 2); lines = [words.slice(0, h2).join(' '), words.slice(h2).join(' ')]; }
+    lines.forEach((L, li) => s += txt(cx, H - mb + 18 + li * 11, L, { a: 'middle', size: 9.8, w: 600, fill: 'var(--ink)' }));
+    if (i < bars.length - 1) { const nx = ml + cw * (i + 1) + cw / 2 - bw / 2; s += `<line x1="${x + bw}" x2="${nx}" y1="${sy(cursor)}" y2="${sy(cursor)}" stroke="#C6CEDA" stroke-width="1" stroke-dasharray="3 3"/>`; }
+  });
+  return SVG(`0 0 ${W} ${H}`, s);
+}
+
+/* ============ heatmap ============ */
+function heatmap(view) {
+  const rows = [], W = 1000, lw = 168, cellH = 30, gap = 3;
+  const months = Array.from({ length: 12 }, (_, m) => m);
+  if (view === 'cli') {
+    const tot = group(i => isCur(i), i => R.c[i]);
+    const top = [...tot.values()].sort(byVal).slice(0, 10);
+    top.forEach(o => {
+      const vals = months.map(m => { let s = 0; for (const i of IDX) if (isCur(i) && R.m[i] === m && R.c[i] === o.k) s += R.n[i]; return s; });
+      rows.push({ lab: CLI[o.k], vals, color: 'var(--ceruleo)', hex: '#1CA9C9' });
+    });
+  } else {
+    CAT.forEach((c, ci) => {
+      const cur = months.map(m => { let s = 0; for (const i of IDX) if (isCur(i) && R.m[i] === m && R.cat[i] === ci) s += R.n[i]; return s; });
+      const prv = months.map(m => { let s = 0; for (const i of IDX) if (isPrev(i) && R.m[i] === m && R.cat[i] === ci) s += R.n[i]; return s; });
+      rows.push({ lab: c, vals: cur, prev: prv, hex: catColor(ci) });
+    });
+  }
+  const H = 26 + rows.length * (cellH + gap) + 6;
+  const cw = (W - lw) / 12;
+  let s = '';
+  months.forEach(m => s += txt(lw + cw * m + cw / 2, 15, MES[m], { a: 'middle', size: 9.5, w: 600, fill: 'var(--muted)' }));
+  const maxAll = Math.max(1, ...rows.flatMap(r => r.vals.map(Math.abs)));
+  rows.forEach((r, ri) => {
+    const y = 26 + ri * (cellH + gap);
+    const lab = r.lab.length > 26 ? r.lab.slice(0, 25) + '…' : r.lab;
+    s += `<text x="0" y="${y + cellH / 2 + 3.5}" font-size="10.5" font-weight="600" fill="var(--ink)">${esc(lab)}<title>${esc(r.lab)}</title></text>`;
+    months.forEach(m => {
+      const x = lw + cw * m + 1.5, w = cw - 3, v = r.vals[m];
+      let fill = 'var(--soft)', label = '', tip = '', tcol = 'var(--ink)';
+      if (view === 'var') {
+        const p = r.prev[m];
+        if (!v && !p) { fill = '#F3F5F8'; tip = `${r.lab} · ${MESL[m]}: sin venta`; }
+        else if (!p) { fill = mix('#1F9E7A', .3); label = 'nuevo'; tip = `${r.lab} · ${MESL[m]}: ${money0(v)} (sin base ${PY})`; }
+        else {
+          const d = (v / p - 1) * 100, k = Math.min(1, Math.abs(d) / 100);
+          fill = mix(d >= 0 ? '#1F9E7A' : '#E3256B', .18 + k * .72);
+          label = pct(d, 0); tcol = k > .55 ? '#fff' : 'var(--ink)';
+          tip = `${r.lab} · ${MESL[m]}: ${money0(v)} vs ${money0(p)} (${pct(d)})`;
+        }
+      } else {
+        if (v > 0) { const k = Math.abs(v) / maxAll; fill = mix(r.hex, .12 + Math.pow(k, .55) * .82); label = shortMoney(v); tcol = k > .45 ? '#fff' : 'var(--ink)'; }
+        else if (v < 0) { fill = mix('#E3256B', .5); label = shortMoney(v); tcol = '#fff'; }
+        tip = `${r.lab} · ${MESL[m]} ${CY}: ${v ? money0(v) : 'sin venta'}`;
+      }
+      s += `<rect x="${x}" y="${y}" width="${w}" height="${cellH}" rx="4" fill="${fill}">${T(tip)}</rect>`;
+      if (label) s += `<text x="${x + w / 2}" y="${y + cellH / 2 + 3.5}" font-size="9.5" font-weight="600" text-anchor="middle" fill="${tcol}" class="n" pointer-events="none">${esc(label)}</text>`;
+    });
+  });
+  return SVG(`0 0 ${W} ${H}`, s);
+}
+
+/* ============ tablas genéricas ============ */
+function tbl(head, rows, opt = {}) {
+  const th = head.map(h => `<th class="${h.l ? 'l' : ''}">${esc(h.t)}</th>`).join('');
+  const tr = rows.map(r => `<tr>${r.map(c => typeof c === 'object' ? `<td class="${c.cls || ''}">${c.h}</td>` : `<td>${c}</td>`).join('')}</tr>`).join('');
+  return `<div class="tw"><table><thead><tr>${th}</tr></thead><tbody>${tr}${opt.foot || ''}</tbody></table></div>`;
+}
+const cN = h => ({ h, cls: 'n' });
+const cL = (h, cls) => ({ h, cls: 'l ' + (cls || '') });
+
+/* ============ 1 · RESUMEN ============ */
+function renderResumen() {
+  const mtdC = sum(i => isCur(i) && R.m[i] === CM && R.dd[i] <= CD, 'n');
+  const mtdP = sum(i => isPrev(i) && R.m[i] === CM && R.dd[i] <= CD, 'n');
+  const ytdC = sum(i => isCur(i) && inYtd(i), 'n'), ytdP = sum(i => isPrev(i) && inYtd(i), 'n');
+  const unC = sum(i => isCur(i) && inYtd(i), 'u'), unP = sum(i => isPrev(i) && inYtd(i), 'u');
+  const pmC = unC ? ytdC / unC : 0, pmP = unP ? ytdP / unP : 0;
+  const k1 = yoy(mtdC, mtdP), k2 = yoy(ytdC, ytdP), k3 = yoy(unC, unP), k4 = yoy(pmC, pmP);
+
+  const kpis = `<div class="grid g4">
+    ${kpi(`Venta MTD · ${MESL[CM]} ${CY}`, money(mtdC), `${chip(k1)}<span>${MESL[CM]} ${PY} al día ${CD}: ${money(mtdP)}</span>`, 'var(--magenta)')}
+    ${kpi(`Venta YTD ${CY}`, money(ytdC), `${chip(k2)}<span>${PY}: ${money(ytdP)}</span>`, 'var(--ceruleo)')}
+    ${kpi(`Unidades YTD ${CY}`, nf(unC) + ' <small>un</small>', `${chip(k3)}<span>${money0(Math.round(pmC))} por unidad</span>`, 'var(--violeta)')}
+    ${kpi('Variación YoY comparable', k2.v === null ? '—' : pct(k2.v), `<span>1-ene al ${CD}-${MES[CM].toLowerCase()} · ${CY} vs ${PY}</span>`, k2.v >= 0 ? 'var(--verde)' : 'var(--naranja)')}
+  </div>`;
+
+  const sC = Array(12).fill(0), sP = Array(12).fill(0);
+  for (const i of IDX) { if (isCur(i)) sC[R.m[i]] += R.n[i]; else if (isPrev(i)) sP[R.m[i]] += R.n[i]; }
+
+  const trend = `<div class="card"><div class="chead"><div><h2>Tendencia mensual de venta neta</h2>
+    <p class="hint">Barras comparadas ${PY} vs ${CY}. Los meses sin movimiento quedan vacíos.</p></div>
+    <div class="legend" style="margin-left:auto"><span><i style="background:#B9C2CD"></i>${PY}</span><span><i style="background:var(--magenta)"></i>${CY}</span></div></div>
+    ${monthBars(sP, sC, { h: 300 })}</div>`;
+
+  const deltas = CAT.map((c, ci) => {
+    const a = sum(i => isCur(i) && inYtd(i) && R.cat[i] === ci, 'n');
+    const b = sum(i => isPrev(i) && inYtd(i) && R.cat[i] === ci, 'n');
+    return { lab: c, v: a - b, c: catColor(ci) };
+  }).sort((a, b) => b.v - a.v);
+  const wf = `<div class="card"><h2>Puente de variación YoY</h2>
+    <p class="hint">Del YTD ${PY} al YTD ${CY}, descompuesto por categoría (tramo comparable al ${CD} de ${MESL[CM]}).</p>
+    ${waterfall(ytdP, deltas, ytdC)}</div>`;
+
+  const hm = `<div class="card"><div class="chead"><div><h2>Mapa de calor</h2><p class="hint" id="hmHint"></p></div>
+    <div class="seg" id="hmSeg" style="margin-left:auto">
+      <button data-v="val" class="on">Venta ${CY}</button><button data-v="var">Var. vs ${PY}</button><button data-v="cli">Top clientes</button>
+    </div></div><div id="hmBody"></div></div>`;
+
+  const skus = [...group(i => isCur(i) && inYtd(i), i => R.p[i]).values()].sort(byVal).slice(0, 5);
+  const skuPrev = group(i => isPrev(i) && inYtd(i), i => R.p[i]);
+  const tSku = `<div class="card"><h2>Top 5 SKU</h2><p class="hint">Venta neta YTD ${CY}</p>` + tbl(
+    [{ t: 'Producto', l: 1 }, { t: 'Venta' }, { t: 'YoY' }],
+    skus.map(o => [cL(`<span class="dot" style="background:${catColor(PC[o.k])}"></span>${esc(PN[o.k])}`, 'name'),
+    cN(money(o.n)), cN(`<span class="chip ${yoy(o.n, (skuPrev.get(o.k) || { n: 0 }).n).c}">${yoy(o.n, (skuPrev.get(o.k) || { n: 0 }).n).t}</span>`)])) + '</div>';
+
+  const cats = [...group(i => isCur(i) && inYtd(i), i => R.cat[i]).values()].sort(byVal);
+  const catsP = group(i => isPrev(i) && inYtd(i), i => R.cat[i]);
+  const tCat = `<div class="card"><h2>Categorías</h2><p class="hint">Venta neta YTD ${CY} y participación · ${cats.length} con movimiento</p>` + tbl(
+    [{ t: 'Categoría', l: 1 }, { t: 'Venta' }, { t: 'Part.' }, { t: 'YoY' }],
+    cats.map(o => [cL(`<span class="dot" style="background:${catColor(o.k)}"></span>${esc(CAT[o.k])}`),
+    cN(money(o.n)), cN(pct0(ytdC ? o.n / ytdC * 100 : 0)),
+    cN(`<span class="chip ${yoy(o.n, (catsP.get(o.k) || { n: 0 }).n).c}">${yoy(o.n, (catsP.get(o.k) || { n: 0 }).n).t}</span>`)])) + '</div>';
+
+  const clis = [...group(i => isCur(i) && inYtd(i), i => R.c[i]).values()].sort(byVal).slice(0, 10);
+  const clisP = group(i => isPrev(i) && inYtd(i), i => R.c[i]);
+  const tCli = `<div class="card"><h2>Top 10 clientes</h2><p class="hint">Venta neta YTD ${CY}</p>` + tbl(
+    [{ t: '#', l: 1 }, { t: 'Cliente', l: 1 }, { t: 'Venta' }, { t: 'Part.' }, { t: 'YoY' }],
+    clis.map((o, ix) => [cL(String(ix + 1), 'n'), cL(esc(CLI[o.k]), 'name'), cN(money(o.n)), cN(pct0(ytdC ? o.n / ytdC * 100 : 0)),
+    cN(`<span class="chip ${yoy(o.n, (clisP.get(o.k) || { n: 0 }).n).c}">${yoy(o.n, (clisP.get(o.k) || { n: 0 }).n).t}</span>`)])) + '</div>';
+
+  document.getElementById('p-resumen').innerHTML = kpis + trend + wf + hm +
+    `<div class="grid g3">${tSku}${tCat}${tCli}</div>`;
+
+  const seg = document.getElementById('hmSeg');
+  seg.onclick = e => { const b = e.target.closest('button'); if (!b) return; [...seg.children].forEach(x => x.classList.toggle('on', x === b)); drawHm(b.dataset.v); };
+  drawHm('val');
+}
+function drawHm(v) {
+  document.getElementById('hmBody').innerHTML = heatmap(v);
+  document.getElementById('hmHint').textContent = v === 'val' ? `Venta neta por categoría y mes, año ${CY}.`
+    : v === 'var' ? `Variación de venta neta por categoría y mes, ${CY} contra ${PY}.`
+      : `Venta neta ${CY} por mes de los 10 mayores clientes del año.`;
+}
+
+/* ============ 2 · VENTAS Y TENDENCIA ============ */
+function renderVentas() {
+  const netaC = sum(i => isCur(i) && inYtd(i), 'n'), netaP = sum(i => isPrev(i) && inYtd(i), 'n');
+  const unC = sum(i => isCur(i) && inYtd(i), 'u'), unP = sum(i => isPrev(i) && inYtd(i), 'u');
+  const facC = uniq(i => isCur(i) && inYtd(i), 'f'), facP = uniq(i => isPrev(i) && inYtd(i), 'f');
+  const tkC = facC ? netaC / facC : 0, tkP = facP ? netaP / facP : 0;
+  const pmC = unC ? netaC / unC : 0, pmP = unP ? netaP / unP : 0;
+
+  const kpis = `<div class="grid g4">
+    ${kpi(`Venta neta YTD ${CY}`, money(netaC), `${chip(yoy(netaC, netaP))}<span>${PY}: ${money(netaP)}</span>`, 'var(--magenta)')}
+    ${kpi(`Unidades YTD ${CY}`, nf(unC) + ' <small>un</small>', `${chip(yoy(unC, unP))}<span>${PY}: ${nf(unP)} un</span>`, 'var(--ceruleo)')}
+    ${kpi(`Facturas YTD ${CY}`, nf(facC), `${chip(yoy(tkC, tkP))}<span>ticket medio ${money(tkC)}</span>`, 'var(--violeta)')}
+    ${kpi('Precio medio por unidad', money0(Math.round(pmC)), `${chip(yoy(pmC, pmP))}<span>${PY}: ${money0(Math.round(pmP))}</span>`, 'var(--naranja)')}
+  </div>`;
+
+  const mC = Array(12).fill(0), mP = Array(12).fill(0), uC = Array(12).fill(0), uP = Array(12).fill(0);
+  for (const i of IDX) {
+    if (isCur(i)) { mC[R.m[i]] += R.n[i]; uC[R.m[i]] += R.u[i]; }
+    else if (isPrev(i)) { mP[R.m[i]] += R.n[i]; uP[R.m[i]] += R.u[i]; }
+  }
+  const rows = MES.map((nm, m) => {
+    const hasCur = m <= CM;
+    const y = hasCur ? yoy(mC[m], mP[m]) : { t: '—', c: 'nt' };
+    return [
+      cL(`<b>${nm}</b>${m === CM && PARTIAL ? ' <span class="pill">parcial</span>' : ''}`),
+      cN(hasCur ? (mC[m] ? money(mC[m]) : '—') : '—'),
+      cN(hasCur ? (uC[m] ? nf(uC[m]) : '—') : '—'),
+      cN(mP[m] ? money(mP[m]) : '—'),
+      cN(uP[m] ? nf(uP[m]) : '—'),
+      cN(hasCur && mP[m] ? `<span class="chip ${y.c}">${y.t}</span>` : '<span class="mini">—</span>')
+    ];
+  });
+  const totC = mC.reduce((a, b) => a + b, 0), totP = mP.reduce((a, b) => a + b, 0);
+  const totUC = uC.reduce((a, b) => a + b, 0), totUP = uP.reduce((a, b) => a + b, 0);
+  const foot = `<tr class="tot"><td>Total año</td><td class="n">${money(totC)}</td><td class="n">${nf(totUC)}</td>
+    <td class="n">${money(totP)}</td><td class="n">${nf(totUP)}</td><td class="n">${totP ? pct((totC / totP - 1) * 100) : '—'}</td></tr>`;
+  const detalle = `<div class="card"><h2>Detalle mensual</h2>
+    <p class="hint">Venta neta y unidades, ${CY} contra ${PY}. Los meses aún sin movimiento muestran un guión.</p>` +
+    tbl([{ t: 'Mes', l: 1 }, { t: `Venta ${CY}` }, { t: `Un. ${CY}` }, { t: `Venta ${PY}` }, { t: `Un. ${PY}` }, { t: 'YoY' }], rows, { foot }) + '</div>';
+
+  const estac = `<div class="card"><div class="chead"><div><h2>Estacionalidad en unidades</h2>
+    <p class="hint">Unidades netas por mes, ${PY} vs ${CY}.</p></div>
+    <div class="legend" style="margin-left:auto"><span><i style="background:#B9C2CD"></i>${PY}</span><span><i style="background:var(--ceruleo)"></i>${CY}</span></div></div>
+    ${monthBars(uP, uC, { h: 290, unit: 'u', color: '#1CA9C9' })}</div>`;
+
+  document.getElementById('p-ventas').innerHTML = kpis + detalle + estac;
+}
+
+/* ============ 3 · PRODUCTOS ============ */
+function renderProductos() {
+  const gp = group(i => isCur(i) && inYtd(i), i => R.p[i]);
+  const gpP = group(i => isPrev(i) && inYtd(i), i => R.p[i]);
+  const list = [...gp.values()].sort(byVal);
+  const totN = list.reduce((a, o) => a + o.n, 0), totU = list.reduce((a, o) => a + o.u, 0);
+  let cum = 0, n80 = 0;
+  for (const o of list) { cum += o.n; n80++; if (cum >= totN * .8) break; }
+  const pm = totU ? totN / totU : 0;
+  const unP = sum(i => isPrev(i) && inYtd(i), 'u'), netP = sum(i => isPrev(i) && inYtd(i), 'n');
+  const pmP = unP ? netP / unP : 0;
+
+  const kpis = `<div class="grid g4">
+    ${kpi(`SKU con venta ${CY}`, nf(list.length) + ` <small>/ ${PN.length}</small>`, `<span>${pct0(list.length / PN.length * 100, 0)} del catálogo con movimiento</span>`, 'var(--magenta)')}
+    ${kpi(`Unidades YTD ${CY}`, nf(totU) + ' <small>un</small>', `${chip(yoy(totU, unP))}<span>${PY}: ${nf(unP)} un</span>`, 'var(--ceruleo)')}
+    ${kpi('Precio medio por unidad', money0(Math.round(pm)), `${chip(yoy(pm, pmP))}<span>${PY}: ${money0(Math.round(pmP))}</span>`, 'var(--violeta)')}
+    ${kpi('Concentración 80/20', nf(n80) + ' <small>SKU</small>', `<span>concentran el 80% de la venta ${CY}</span>`, 'var(--naranja)')}
+  </div>`;
+
+  const crayons = `<div class="card"><h2>Venta por categoría</h2>
+    <p class="hint">Venta neta YTD ${CY}</p>${crayonChart()}</div>`;
+
+  const rank = `<div class="card"><h2>Ranking de SKU</h2><p class="hint">Venta neta YTD ${CY} · ${list.length} SKU con movimiento</p>` +
+    tbl([{ t: '#', l: 1 }, { t: 'Producto', l: 1 }, { t: 'Categoría', l: 1 }, { t: 'Unidades' }, { t: 'Venta' }, { t: 'YoY' }, { t: 'Part.' }],
+      list.map((o, ix) => {
+        const y = yoy(o.n, (gpP.get(o.k) || { n: 0 }).n);
+        return [cL(String(ix + 1), 'n'), cL(esc(PN[o.k]), 'name'),
+        cL(`<span class="dot" style="background:${catColor(PC[o.k])}"></span><span class="mini">${esc(CAT[PC[o.k]])}</span>`),
+        cN(nf(o.u)), cN(money(o.n)), cN(`<span class="chip ${y.c}">${y.t}</span>`), cN(pct0(totN ? o.n / totN * 100 : 0))];
+      })) + '</div>';
+
+  const pareto = `<div class="card"><div class="chead"><div><h2>Curva de Pareto por SKU</h2>
+    <p class="hint">Venta neta ${CY} acumulada, de mayor a menor.</p></div></div>${paretoChart(list, totN)}
+    <div class="grid g3" style="margin-top:14px;gap:10px">
+      ${miniStat('Top 5 SKU', pct0(share(list, 5, totN)) + ' de la venta')}
+      ${miniStat('Top 10 SKU', pct0(share(list, 10, totN)) + ' de la venta')}
+      ${miniStat('SKU para el 80%', nf(n80) + ` de ${list.length}`)}
+    </div></div>`;
+
+  document.getElementById('p-productos').innerHTML = kpis + crayons + `<div class="grid g23">${rank}${pareto}</div>`;
+}
+const share = (list, n, tot) => tot ? list.slice(0, n).reduce((a, o) => a + o.n, 0) / tot * 100 : 0;
+const miniStat = (l, v) => `<div style="background:var(--soft);border-radius:10px;padding:10px 12px">
+  <div class="lab" style="font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">${esc(l)}</div>
+  <div class="num" style="font-size:15px;font-weight:600;margin-top:3px">${esc(v)}</div></div>`;
+
+function crayonChart() {
+  const W = 1000, rowH = 34, gap = 16, tip = 17, padR = 236, labFont = '600 12px Inter, sans-serif';
+  const data = CAT.map((c, ci) => {
+    const n = sum(i => isCur(i) && inYtd(i) && R.cat[i] === ci, 'n');
+    const u = sum(i => isCur(i) && inYtd(i) && R.cat[i] === ci, 'u');
+    const p = sum(i => isPrev(i) && inYtd(i) && R.cat[i] === ci, 'n');
+    const sk = uniq(i => isCur(i) && inYtd(i) && R.cat[i] === ci, 'p');
+    return { lab: c, n, u, p, sk, hex: catColor(ci) };
+  }).filter(o => o.n > 0 || o.u !== 0).sort((a, b) => b.n - a.n);
+  if (!data.length) return '<p class="empty">Sin venta en el período filtrado.</p>';
+  const maxV = Math.max(...data.map(o => Math.max(0, o.n)), 1);
+  const maxL = W - tip - padR;
+  const minL = o => textW(o.lab, labFont) + 30 + 40;          // banda de papel + cuerpo mínimo
+  const H = data.length * rowH + (data.length - 1) * gap + 8;
+  let s = '';
+  data.forEach((o, ri) => {
+    const y = ri * (rowH + gap), yc = y + rowH / 2;
+    const L = Math.max(minL(o), Math.min(maxL, (Math.max(0, o.n) / maxV) * maxL));
+    const dark = o.hex;
+    s += `<g>${T(`${o.lab}: ${money0(o.n)} · ${nf(o.u)} un · ${o.sk} SKU`)}`;
+    s += `<rect x="0" y="${y}" width="${L}" height="${rowH}" rx="7" fill="${dark}"/>`;
+    s += `<rect x="0" y="${y}" width="${L}" height="${rowH * .34}" rx="7" fill="#fff" opacity=".18"/>`;
+    s += `<polygon points="${L},${y} ${L + tip},${yc} ${L},${y + rowH}" fill="${dark}"/>`;
+    s += `<polygon points="${L},${y} ${L + tip},${yc} ${L},${yc}" fill="#fff" opacity=".16"/>`;
+    const bw = textW(o.lab, labFont) + 30, bx = Math.max(6, (L - bw) / 2);
+    s += `<rect x="${bx}" y="${y - 1.5}" width="${bw}" height="${rowH + 3}" rx="3" fill="#FFFFFF" opacity=".93"/>`;
+    s += `<rect x="${bx}" y="${y - 1.5}" width="2" height="${rowH + 3}" fill="${dark}" opacity=".35"/>`;
+    s += `<rect x="${bx + bw - 2}" y="${y - 1.5}" width="2" height="${rowH + 3}" fill="${dark}" opacity=".35"/>`;
+    s += `<text x="${bx + bw / 2}" y="${yc + 4.2}" text-anchor="middle" font-size="12" font-weight="600" fill="${dark}">${esc(o.lab)}</text>`;
+    s += `</g>`;
+    const xr = L + tip + 14, yv = yoy(o.n, o.p);
+    s += `<text x="${xr}" y="${yc - 2}" font-size="13" font-weight="700" fill="var(--ink)" class="n">${esc(shortMoney(o.n))}</text>`;
+    s += `<text x="${xr}" y="${yc + 12.5}" font-size="10.5" fill="var(--muted)" class="n">${esc(nf(o.u) + ' un · ' + o.sk + ' SKU · ' + yv.t)}</text>`;
+  });
+  return SVG(`0 0 ${W} ${H}`, s);
+}
+function paretoChart(list, tot) {
+  const W = 1000, H = 300, ml = 52, mr = 46, mt = 18, mb = 26, iw = W - ml - mr, ih = H - mt - mb;
+  if (!list.length || !tot) return '<p class="empty">Sin venta en el período filtrado.</p>';
+  const n = list.length, cw = iw / n, max = niceMax(list[0].n);
+  let s = '', cum = 0, pts = [];
+  axisTicks(max).forEach(t => {
+    const y = mt + ih - t / max * ih;
+    s += `<line x1="${ml}" x2="${W - mr}" y1="${y}" y2="${y}" class="mline" ${t === 0 ? '' : 'stroke-dasharray="2 4"'}/>` +
+      txt(ml - 7, y + 3.5, shortMoney(t), { a: 'end', size: 9, mono: 1 });
+  });
+  [0, 50, 80, 100].forEach(p => {
+    const y = mt + ih - p / 100 * ih;
+    if (p === 80) s += `<line x1="${ml}" x2="${W - mr}" y1="${y}" y2="${y}" stroke="var(--naranja)" stroke-width="1" stroke-dasharray="5 3"/>`;
+    s += txt(W - mr + 7, y + 3.5, p + '%', { a: 'start', size: 9, mono: 1, fill: p === 80 ? 'var(--naranja)' : 'var(--muted)' });
+  });
+  list.forEach((o, i) => {
+    const x = ml + cw * i, h = Math.max(1, o.n / max * ih);
+    s += `<rect x="${x + cw * .12}" y="${mt + ih - h}" width="${cw * .76}" height="${h}" fill="${catColor(PC[o.k])}" opacity=".85">${T(`${PN[o.k]}: ${money0(o.n)}`)}</rect>`;
+    cum += o.n; pts.push([x + cw / 2, mt + ih - (cum / tot) * ih]);
+  });
+  s += `<polyline points="${pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ')}" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linejoin="round"/>`;
+  pts.forEach((p, i) => { if (i % 5 === 0 || i === pts.length - 1) s += `<circle cx="${p[0]}" cy="${p[1]}" r="2.6" fill="var(--ink)">${T(`${i + 1} SKU acumulan ${pct0((list.slice(0, i + 1).reduce((a, o) => a + o.n, 0)) / tot * 100)}`)}</circle>`; });
+  s += txt(ml, H - 8, `SKU ordenados por venta (1 → ${n})`, { size: 9.5 });
+  return SVG(`0 0 ${W} ${H}`, s);
+}
+
+/* ============ 4 · CLIENTES Y CANAL ============ */
+function renderClientes() {
+  const gC = group(i => isCur(i) && inYtd(i), i => R.c[i]);
+  const gP = group(i => isPrev(i) && inYtd(i), i => R.c[i]);
+  const gPfull = group(i => isPrev(i), i => R.c[i]);
+  const gCfull = group(i => isCur(i), i => R.c[i]);
+  const act = gC.size, actP = gP.size;
+  const nuevos = [...gC.values()].filter(o => !gPfull.has(o.k)).sort(byVal);
+  const perdidos = [...gPfull.values()].filter(o => !gCfull.has(o.k)).sort(byVal);
+  const totN = [...gC.values()].reduce((a, o) => a + o.n, 0);
+  const top5 = share([...gC.values()].sort(byVal), 5, totN);
+
+  const kpis = `<div class="grid g4">
+    ${kpi(`Clientes activos ${CY}`, nf(act), `${chip(yoy(act, actP))}<span>${PY} al mismo tramo: ${nf(actP)}</span>`, 'var(--magenta)')}
+    ${kpi('Clientes nuevos', nf(nuevos.length), `<span>compran en ${CY} y no compraron en ${PY}</span>`, 'var(--verde)')}
+    ${kpi('Clientes por retomar', nf(perdidos.length), `<span>compraron en ${PY} y aún no en ${CY}</span>`, 'var(--naranja)')}
+    ${kpi('Concentración top 5', pct0(top5), `<span>de la venta neta YTD ${CY}</span>`, 'var(--violeta)')}
+  </div>`;
+
+  const canalPrinc = k => { const m = new Map(); for (const i of IDX) if (isCur(i) && R.c[i] === k) m.set(R.k[i], (m.get(R.k[i]) || 0) + R.n[i]); let b = -1, bv = -Infinity; m.forEach((v, kk) => { if (v > bv) { bv = v; b = kk; } }); return b; };
+  const top25 = [...gC.values()].sort(byVal).slice(0, 25);
+  const tTop = `<div class="card"><h2>Los 25 mayores clientes</h2><p class="hint">Venta neta YTD ${CY}</p>` +
+    tbl([{ t: '#', l: 1 }, { t: 'Cliente', l: 1 }, { t: 'Canal', l: 1 }, { t: 'Fact.' }, { t: 'Unidades' }, { t: 'Venta' }, { t: 'YoY' }, { t: 'Última compra' }],
+      top25.map((o, ix) => {
+        const y = yoy(o.n, (gP.get(o.k) || { n: 0 }).n), ci = canalPrinc(o.k);
+        return [cL(String(ix + 1), 'n'), cL(esc(CLI[o.k]), 'name'), cL(`<span class="mini">${esc(CAN[ci] || '—')}</span>`),
+        cN(nf(o.f.size)), cN(nf(o.u)), cN(money(o.n)), cN(`<span class="chip ${y.c}">${y.t}</span>`), cN(`<span class="mini">${dstr(o.last)}</span>`)];
+      })) + '</div>';
+
+  const gk = [...group(i => isCur(i) && inYtd(i), i => R.k[i]).values()].sort(byVal);
+  const gkP = group(i => isPrev(i) && inYtd(i), i => R.k[i]);
+  const donutCard = `<div class="card"><h2>Mezcla por canal</h2><p class="hint">Venta neta YTD ${CY}</p>
+    ${donut(gk.map(o => ({ lab: CAN[o.k], v: o.n })))}
+    ${tbl([{ t: 'Canal', l: 1 }, { t: 'Venta' }, { t: 'Part.' }, { t: 'Clientes' }, { t: 'YoY' }],
+    gk.map((o, ix) => { const y = yoy(o.n, (gkP.get(o.k) || { n: 0 }).n); return [
+      cL(`<span class="dot" style="background:${PAL[ix % 5]}"></span>${esc(CAN[o.k])}`), cN(money(o.n)),
+      cN(pct0(totN ? o.n / totN * 100 : 0)), cN(nf(o.c.size)), cN(`<span class="chip ${y.c}">${y.t}</span>`)]; }))}</div>`;
+
+  const tNuevos = `<div class="card"><h2>Clientes nuevos</h2><p class="hint">Primera compra en ${CY}</p>` +
+    (nuevos.length ? tbl([{ t: 'Cliente', l: 1 }, { t: 'Venta' }, { t: 'Un.' }, { t: 'Última' }],
+      nuevos.slice(0, 15).map(o => [cL(esc(CLI[o.k]), 'name'), cN(money(o.n)), cN(nf(o.u)), cN(`<span class="mini">${dstr(o.last)}</span>`)]))
+      : '<p class="empty">Sin clientes nuevos en el período filtrado.</p>') + '</div>';
+
+  const tPerd = `<div class="card"><h2>Clientes por retomar</h2><p class="hint">Con venta en ${PY} y sin compra en ${CY}</p>` +
+    (perdidos.length ? tbl([{ t: 'Cliente', l: 1 }, { t: `Venta ${PY}` }, { t: 'Un.' }, { t: 'Última' }],
+      perdidos.slice(0, 15).map(o => [cL(esc(CLI[o.k]), 'name'), cN(money(o.n)), cN(nf(o.u)), cN(`<span class="mini">${dstr(o.last)}</span>`)]))
+      : '<p class="empty">Todos los clientes de ' + PY + ' ya compraron en ' + CY + '.</p>') + '</div>';
+
+  const gz = [...group(i => isCur(i) && inYtd(i), i => R.z[i]).values()].sort(byVal);
+  const gzP = group(i => isPrev(i) && inYtd(i), i => R.z[i]);
+  const maxZ = Math.max(1, ...gz.map(o => o.n));
+  const tZona = `<div class="card"><h2>Cobertura geográfica</h2><p class="hint">Venta neta YTD ${CY} por zona</p>` +
+    tbl([{ t: 'Zona', l: 1 }, { t: 'Clientes' }, { t: 'Venta' }, { t: 'Part.' }, { t: 'YoY' }],
+      gz.map(o => { const y = yoy(o.n, (gzP.get(o.k) || { n: 0 }).n); return [
+        { h: `<i style="width:${(o.n / maxZ * 100).toFixed(1)}%;background:var(--ceruleo)"></i><span>${esc(ZON[o.k])}</span>`, cls: 'l bar-cell' },
+        cN(nf(o.c.size)), cN(money(o.n)), cN(pct0(totN ? o.n / totN * 100 : 0)), cN(`<span class="chip ${y.c}">${y.t}</span>`)]; })) + '</div>';
+
+  const gv = [...group(i => isCur(i) && inYtd(i), i => R.v[i]).values()].sort(byVal);
+  const gvP = group(i => isPrev(i) && inYtd(i), i => R.v[i]);
+  const tVend = `<div class="card"><h2>Fuerza de venta</h2><p class="hint">Venta neta YTD ${CY} por vendedor</p>` +
+    tbl([{ t: 'Vendedor', l: 1 }, { t: 'Clientes' }, { t: 'Facturas' }, { t: 'Unidades' }, { t: 'Venta' }, { t: 'Ticket' }, { t: 'Part.' }, { t: 'YoY' }],
+      gv.map(o => { const y = yoy(o.n, (gvP.get(o.k) || { n: 0 }).n); return [
+        cL(esc(VEN[o.k])), cN(nf(o.c.size)), cN(nf(o.f.size)), cN(nf(o.u)), cN(money(o.n)),
+        cN(money(o.f.size ? o.n / o.f.size : 0)), cN(pct0(totN ? o.n / totN * 100 : 0)), cN(`<span class="chip ${y.c}">${y.t}</span>`)]; })) + '</div>';
+
+  document.getElementById('p-clientes').innerHTML = kpis + tTop + `<div class="grid g23">${donutCard}${tZona}</div>` +
+    `<div class="grid g2">${tNuevos}${tPerd}</div>` + tVend;
+}
+function donut(items) {
+  const W = 420, H = 220, cx = 118, cy = 110, r = 82, ir = 50;
+  const tot = items.reduce((a, o) => a + Math.max(0, o.v), 0);
+  if (!tot) return '<p class="empty">Sin venta en el período filtrado.</p>';
+  let a0 = -Math.PI / 2, s = '';
+  items.forEach((o, i) => {
+    const v = Math.max(0, o.v); if (!v) return;
+    const a1 = a0 + v / tot * Math.PI * 2, big = a1 - a0 > Math.PI ? 1 : 0;
+    const p = (rr, a) => [cx + rr * Math.cos(a), cy + rr * Math.sin(a)];
+    const [x0, y0] = p(r, a0), [x1, y1] = p(r, a1), [x2, y2] = p(ir, a1), [x3, y3] = p(ir, a0);
+    s += `<path d="M${x0} ${y0} A${r} ${r} 0 ${big} 1 ${x1} ${y1} L${x2} ${y2} A${ir} ${ir} 0 ${big} 0 ${x3} ${y3} Z" fill="${PAL[i % 5]}" stroke="#fff" stroke-width="1.5">${T(`${o.lab}: ${money0(v)} · ${pct0(v / tot * 100)}`)}</path>`;
+    a0 = a1;
+  });
+  s += `<text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink)" class="n">${esc(shortMoney(tot))}</text>`;
+  s += `<text x="${cx}" y="${cy + 13}" text-anchor="middle" font-size="9.5" fill="var(--muted)">venta neta</text>`;
+  items.slice(0, 6).forEach((o, i) => {
+    const y = 34 + i * 26;
+    s += `<rect x="238" y="${y - 9}" width="11" height="11" rx="3" fill="${PAL[i % 5]}"/>`;
+    s += `<text x="256" y="${y}" font-size="11" font-weight="600" fill="var(--ink)">${esc(o.lab.length > 20 ? o.lab.slice(0, 19) + '…' : o.lab)}</text>`;
+    s += `<text x="256" y="${y + 12}" font-size="9.5" fill="var(--muted)" class="n">${esc(shortMoney(o.v))} · ${pct0(o.v / tot * 100)}</text>`;
+  });
+  return SVG(`0 0 ${W} ${H}`, s, 'style="max-height:230px;margin-bottom:8px"');
+}
+
+/* ============ 5 · CIERRE MENSUAL ============ */
+function renderCierre() {
+  const meses = ALLM.slice().reverse();
+  if (F.mes === null || !ALLM.includes(F.mes)) F.mes = ALLM[ALLM.length - 1];
+  const sel = `<div class="card" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px">
+    <div><h2 style="margin:0">Cierre mensual</h2><p class="hint" style="margin:2px 0 0">Elige el mes a revisar. Todos los meses con movimiento del archivo.</p></div>
+    <div class="fld" style="margin-left:auto"><label for="mSel">Mes</label><select id="mSel">${meses.map(k =>
+      `<option value="${k}" ${k === F.mes ? 'selected' : ''}>${MESL[k % 12][0].toUpperCase() + MESL[k % 12].slice(1)} ${Math.floor(k / 12)}</option>`).join('')}</select></div></div>`;
+  document.getElementById('p-cierre').innerHTML = sel + '<div id="cBody"></div>';
+  document.getElementById('mSel').onchange = e => { F.mes = +e.target.value; drawCierre(); };
+  drawCierre();
+}
+function mAgg(k) {
+  const y = Math.floor(k / 12), m = k % 12;
+  const o = { n: 0, u: 0, f: new Set(), c: new Set() };
+  for (const i of IDX) if (R.y[i] === y && R.m[i] === m) { o.n += R.n[i]; o.u += R.u[i]; o.f.add(R.f[i]); o.c.add(R.c[i]); }
+  return o;
+}
+function drawCierre() {
+  const k = F.mes, y = Math.floor(k / 12), m = k % 12, isPartial = (y === CY && m === CM && PARTIAL);
+  const cur = mAgg(k), prevM = mAgg(k - 1), prevY = mAgg(k - 12);
+  const tk = cur.f.size ? cur.n / cur.f.size : 0;
+  const ytd = sum(i => isCur(i) && inYtd(i), 'n');
+  const skuMes = uniq(i => R.y[i] === y && R.m[i] === m, 'p');
+  const nom = MESL[m][0].toUpperCase() + MESL[m].slice(1) + ' ' + y;
+
+  const kpis = `<div class="grid g4">
+    ${kpi(`Venta neta · ${nom}`, money(cur.n), `${chip(yoy(cur.n, prevY.n))}<span>${MES[m]} ${y - 1}: ${money(prevY.n)}</span>`, 'var(--magenta)')}
+    ${kpi('Unidades del mes', nf(cur.u) + ' <small>un</small>', `${chip(yoy(cur.u, prevM.u))}<span>vs mes anterior: ${nf(prevM.u)} un</span>`, 'var(--ceruleo)')}
+    ${kpi('Clientes con compra', nf(cur.c.size), `<span>${nf(cur.f.size)} facturas · ticket ${money(tk)}</span>`, 'var(--violeta)')}
+    ${kpi(`Peso en el año ${CY}`, y === CY && ytd ? pct0(cur.n / ytd * 100) : '—', `<span>${nf(skuMes)} SKU con venta en el mes</span>`, 'var(--naranja)')}
+  </div>`;
+
+  const partial = isPartial ? `<div class="card" style="padding:10px 16px;margin-bottom:14px;border-left:4px solid var(--naranja)">
+    <span class="pill" style="color:var(--naranja);border-color:var(--naranja)">Mes parcial</span>
+    <span style="font-size:12.5px;margin-left:8px">${nom} está cerrado hasta el ${CD} de ${MESL[m]}.</span></div>` : '';
+
+  const last13 = `<div class="card"><h2>Últimos 13 meses</h2><p class="hint">Venta neta hasta ${nom}; el mes elegido va destacado.</p>${trail13(k)}</div>`;
+
+  const gcat = [...group(i => R.y[i] === y && R.m[i] === m, i => R.cat[i]).values()].sort(byVal);
+  const tcat = `<div class="card"><h2>Composición por categoría</h2><p class="hint">${nom}</p>` +
+    (gcat.length ? tbl([{ t: 'Categoría', l: 1 }, { t: 'Venta' }, { t: 'Part.' }, { t: 'Unidades' }, { t: 'SKU' }],
+      gcat.map(o => [{ h: `${PAL.includes(catColor(o.k)) && o.n > 0 ? `<i style="width:${(cur.n ? o.n / cur.n * 100 : 0).toFixed(1)}%;background:${catColor(o.k)}"></i>` : ''}<span><span class="dot" style="background:${catColor(o.k)}"></span>${esc(CAT[o.k])}</span>`, cls: 'l bar-cell' },
+      cN(money(o.n)), cN(pct0(cur.n ? o.n / cur.n * 100 : 0)), cN(nf(o.u)),
+      cN(nf(new Set(IDX.filter(i => R.y[i] === y && R.m[i] === m && R.cat[i] === o.k).map(i => R.p[i])).size))]))
+      : '<p class="empty">Sin venta en el mes con los filtros aplicados.</p>') + '</div>';
+
+  const gp = [...group(i => R.y[i] === y && R.m[i] === m, i => R.p[i]).values()].sort(byVal).slice(0, 12);
+  const tp = `<div class="card"><h2>Top 12 SKU del mes</h2><p class="hint">${nom}</p>` +
+    (gp.length ? tbl([{ t: 'Producto', l: 1 }, { t: 'Un.' }, { t: 'Venta' }, { t: 'Part.' }],
+      gp.map(o => [cL(`<span class="dot" style="background:${catColor(PC[o.k])}"></span>${esc(PN[o.k])}`, 'name'),
+      cN(nf(o.u)), cN(money(o.n)), cN(pct0(cur.n ? o.n / cur.n * 100 : 0))]))
+      : '<p class="empty">Sin movimiento.</p>') + '</div>';
+
+  const gc = [...group(i => R.y[i] === y && R.m[i] === m, i => R.c[i]).values()].sort(byVal).slice(0, 12);
+  const tc = `<div class="card"><h2>Top 12 clientes del mes</h2><p class="hint">${nom}</p>` +
+    (gc.length ? tbl([{ t: 'Cliente', l: 1 }, { t: 'Fact.' }, { t: 'Un.' }, { t: 'Venta' }, { t: 'Part.' }],
+      gc.map(o => [cL(esc(CLI[o.k]), 'name'), cN(nf(o.f.size)), cN(nf(o.u)), cN(money(o.n)), cN(pct0(cur.n ? o.n / cur.n * 100 : 0))]))
+      : '<p class="empty">Sin movimiento.</p>') + '</div>';
+
+  const rows = ALLM.slice().reverse().map(kk => {
+    const a = mAgg(kk), pm = mAgg(kk - 1), py = mAgg(kk - 12);
+    const yy = Math.floor(kk / 12), mm = kk % 12;
+    const vm = yoy(a.n, pm.n), vy = yoy(a.n, py.n);
+    const par = (yy === CY && mm === CM && PARTIAL);
+    return [
+      cL(`<b>${MES[mm]} ${yy}</b>${par ? ` <span class="pill">parcial · al ${CD}</span>` : ''}`),
+      cN(money(a.n)), cN(nf(a.u)), cN(nf(a.c.size)), cN(nf(a.f.size)),
+      cN(money(a.f.size ? a.n / a.f.size : 0)),
+      cN(ALLM.includes(kk - 1) ? `<span class="chip ${vm.c}">${vm.t}</span>` : '<span class="mini">—</span>'),
+      cN(ALLM.includes(kk - 12) ? `<span class="chip ${vy.c}">${vy.t}</span>` : '<span class="mini">—</span>')
+    ];
+  });
+  const tAll = `<div class="card"><h2>Cierre de meses</h2><p class="hint">Todos los meses con movimiento, del más reciente al más antiguo.</p>` +
+    tbl([{ t: 'Mes', l: 1 }, { t: 'Venta neta' }, { t: 'Unidades' }, { t: 'Clientes' }, { t: 'Facturas' }, { t: 'Ticket' }, { t: 'vs mes ant.' }, { t: 'vs año ant.' }], rows) + '</div>';
+
+  document.getElementById('cBody').innerHTML = kpis + partial + last13 + `<div class="grid g2">${tcat}${tp}</div>` + tc + tAll;
+}
+function trail13(k) {
+  const ks = []; for (let i = 12; i >= 0; i--) ks.push(k - i);
+  const vals = ks.map(kk => mAgg(kk).n);
+  const W = 1000, H = 260, ml = 56, mr = 10, mt = 26, mb = 34, iw = W - ml - mr, ih = H - mt - mb;
+  const max = niceMax(Math.max(...vals, 1)), cw = iw / 13, bw = Math.min(46, cw * .6);
+  let s = '';
+  axisTicks(max).forEach(t => { const y = mt + ih - t / max * ih;
+    s += `<line x1="${ml}" x2="${W - mr}" y1="${y}" y2="${y}" class="mline" ${t === 0 ? '' : 'stroke-dasharray="2 4"'}/>` + txt(ml - 8, y + 3.5, shortMoney(t), { a: 'end', size: 9.5, mono: 1 }); });
+  ks.forEach((kk, i) => {
+    const yy = Math.floor(kk / 12), mm = kk % 12, v = vals[i], cx = ml + cw * i + cw / 2;
+    const on = kk === k, h = Math.max(v > 0 ? 2 : 0, v / max * ih);
+    if (v > 0) s += `<rect x="${cx - bw / 2}" y="${mt + ih - h}" width="${bw}" height="${h}" rx="3" fill="${on ? 'var(--magenta)' : '#C3CBD6'}">${T(`${MESL[mm]} ${yy}: ${money0(v)}`)}</rect>`;
+    if (on && v > 0) s += txt(cx, mt + ih - h - 7, shortMoney(v), { a: 'middle', size: 10, w: 700, mono: 1, fill: 'var(--magenta)' });
+    s += txt(cx, H - 16, MES[mm], { a: 'middle', size: 9.5, w: on ? 700 : 500, fill: on ? 'var(--ink)' : 'var(--muted)' });
+    if (mm === 0 || i === 0) s += txt(cx, H - 5, String(yy), { a: 'middle', size: 9, mono: 1 });
+  });
+  return SVG(`0 0 ${W} ${H}`, s);
+}
+
+/* ============ 6 · SELL OUT TOTTUS ============ */
+/* Reporte de venta al consumidor en Tottus (canal moderno). Fuente distinta a la base
+   de facturación Khatar, por eso esta pestaña no responde a los filtros de canal y zona. */
+const SO = {
+  reporte: '5-nov-2026', periodo: 'últimos 90 días', hasta: '4 de noviembre de 2026',
+  bruta: 17400000, neta: 14618062, un: 3230, margen: 40.9,
+  stock: { un: 2857, costo: 10900000, dias: 322.9, diaria: 8.8 },
+  previo: { fecha: '15-oct', neta: 10904612, un: 2108, margen: 55.2, dias: 20 },
+  sku: [
+    { c: '80011599', n: 'LAPICES SCRIBE PRO 30 UNDS', v: 3943869, cat: 'Lápices de colores' },
+    { c: '80011594', n: 'LAPICES SCRIBE 1 PTA.TRIANG.INCOLORS', v: 2821372, cat: 'Lápices de colores' },
+    { c: '80011595', n: 'LAPICES SCRIBE 1 PTA COLORES PRO', v: 2305115, cat: 'Lápices de colores' },
+    { c: '80011597', n: 'LAPICES COLOR DOBLEPUNTA INCOLORS', v: 2091947, cat: 'Lápices de colores' },
+    { c: '80011598', n: 'RESALTADOR UNIPUNTA INCOLORS', v: 1950741, cat: 'Resaltadores' },
+    { c: '80011596', n: 'LAPICES COLORES UNIPUNTA INCOLORS', v: 1505018, cat: 'Lápices de colores' }
+  ],
+  local: [
+    ['511', 'Vallenar', 603279], ['302', 'Rengo', 603216], ['501', 'Antofagasta Mall', 533563],
+    ['121', 'Plaza Egaña', 533479], ['305', 'Machalí', 531070], ['205', 'San Antonio', 522057],
+    ['153', 'Kennedy II', 515211], ['303', 'San Fernando', 508124], ['512', 'MP La Serena', 499931],
+    ['203', 'Peñaflor', 495381], ['125', 'Chamisero', 470735], ['505', 'Ovalle', 465288],
+    ['301', 'Buin', 451826], ['211', 'San Felipe', 438059], ['209', 'Padre Hurtado', 434318],
+    ['112', 'El Bosque', 415166], ['110', 'Colina', 412376], ['152', 'Plaza Oeste II', 409026],
+    ['507', 'MP Copiapó', 378282], ['316', 'San Vicente', 360471], ['213', 'Viña del Mar · Santa Julia', 358896],
+    ['104', 'Nataniel', 330073], ['206', 'Talagante Cordillera', 313988], ['222', 'Curauma', 310925],
+    ['126', 'Vivaceta', 304373], ['134', 'Quilín', 303696], ['204', 'Melipilla', 301989],
+    ['101', 'San Bernardo Plaza', 301239], ['132', 'La Cisterna', 274334], ['304', 'Talca', 271016],
+    ['309', 'Bío Bío', 269843], ['131', 'Piedra Roja', 264717], ['108', 'La Florida', 250483],
+    ['312', 'Los Ángeles Alemania', 238268], ['202', 'Talagante Plaza', 234400], ['123', 'MP Los Dominicos', 227131],
+    ['311', 'Talca Colín', 169404], ['313', 'Curicó Norte', 159709], ['310', 'Chillán', 152720]
+  ]
+};
+const soCatColor = name => { const i = CAT.indexOf(name); return i >= 0 ? catColor(i) : '#8A95A3'; };
+const barCell = (f, c) => ({ cls: 'l', h: `<span style="display:block;width:86px;height:8px;border-radius:3px;background:var(--soft)">
+  <span style="display:block;height:100%;width:${(Math.max(0, f) * 100).toFixed(1)}%;background:${c};border-radius:3px"></span></span>` });
+
+function renderSellout() {
+  const pm = SO.un ? SO.neta / SO.un : 0, pv = SO.previo;
+  const dNeta = SO.neta - pv.neta, dUn = SO.un - pv.un, ritmo = dNeta / pv.dias;
+
+  /* sell in Khatar → Tottus, leído de la base de facturación (sin filtros) */
+  const kTot = CAN.indexOf('Moderno (Tottus)');
+  let siN = 0, siU = 0, siLast = -1; const siF = new Set();
+  if (kTot >= 0) for (let i = 0; i < N; i++) {
+    if (R.k[i] === kTot && R.y[i] === CY) { siN += R.n[i]; siU += R.u[i]; siF.add(R.f[i]); if (R.di[i] > siLast) siLast = R.di[i]; }
+  }
+
+  const head = `<div class="card" style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:14px">
+    <div><h2 style="margin:0">Sell out Tottus</h2>
+      <p class="hint" style="margin:2px 0 0">Venta al consumidor en los ${SO.local.length} locales Tottus con rotación · ${esc(SO.periodo)}, hasta el ${esc(SO.hasta)}.</p></div>
+    <span class="cut" style="margin-left:auto">Reporte Tottus · ${SO.reporte}</span></div>`;
+
+  const kpis = `<div class="grid g4">
+    ${kpi('Venta neta sell out', money(SO.neta), `<span class="chip up">+${esc(shortMoney(dNeta))}</span><span>vs ${esc(pv.fecha)}: ${money(pv.neta)}</span>`, 'var(--magenta)')}
+    ${kpi('Venta bruta sell out', money(SO.bruta), `<span>con IVA incluido</span>`, 'var(--ceruleo)')}
+    ${kpi('Unidades vendidas', nf(SO.un) + ' <small>un</small>', `<span class="chip up">+${nf(dUn)}</span><span>${money0(Math.round(pm))} por unidad</span>`, 'var(--violeta)')}
+    ${kpi('Margen de entrada', pct0(SO.margen), `<span class="chip dn">${nf(SO.margen - pv.margen, 1)} pp</span><span>${esc(pv.fecha)}: ${pct0(pv.margen)}</span>`, 'var(--naranja)')}
+  </div>`;
+
+  const avance = `<div class="card"><h2>Avance entre reportes</h2>
+    <p class="hint">Lo que Tottus vendió al consumidor en cada corte</p>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px">
+      ${flow(`Al ${pv.fecha} · reporte anterior`, pv.neta, `${nf(pv.un)} un · margen ${pct0(pv.margen)}`, '#B9C2CD', SO.neta)}
+      ${flow(`Al ${SO.hasta.replace(' de 2026', '')} · reporte actual`, SO.neta, `${nf(SO.un)} un · margen ${pct0(SO.margen)}`, 'var(--magenta)', SO.neta)}
+    </div>
+    <div class="grid g3" style="margin-top:14px;gap:10px">
+      ${miniStat('Avance del período', '+' + shortMoney(dNeta) + ' en ' + pv.dias + ' días')}
+      ${miniStat('Unidades sumadas', '+' + nf(dUn) + ' un')}
+      ${miniStat('Ritmo diario', money(ritmo) + ' por día')}
+    </div></div>`;
+
+  const stock = `<div class="card"><h2>Stock en Tottus</h2>
+    <p class="hint">Inventario contable del reporte, al día anterior al corte</p>
+    <div class="grid g2" style="margin-top:4px;gap:10px">
+      ${miniStat('Unidades contables', nf(SO.stock.un) + ' un')}
+      ${miniStat('Costo inventario', money(SO.stock.costo))}
+      ${miniStat('Días de cobertura', nf(SO.stock.dias, 1) + ' días')}
+      ${miniStat('Venta promedio diaria', nf(SO.stock.diaria, 1) + ' un')}
+    </div></div>`;
+
+  const flujo = `<div class="card"><h2>Sell in y sell out</h2>
+    <p class="hint">Lo facturado a Tottus y lo que Tottus vendió al consumidor</p>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px">
+      ${flow('Sell in · Khatar a Tottus', siN, `${nf(siU)} un en ${nf(siF.size)} facturas${siLast >= 0 ? ' · última ' + dstr(siLast) : ''}`, 'var(--ceruleo)', Math.max(siN, SO.neta))}
+      ${flow('Sell out · Tottus a consumidor', SO.neta, `${nf(SO.un)} un · ${esc(SO.periodo)}`, 'var(--magenta)', Math.max(siN, SO.neta))}
+    </div></div>`;
+
+  const maxS = Math.max(...SO.sku.map(o => o.v), 1);
+  const tSku = `<div class="card"><h2>Venta por SKU</h2><p class="hint">Venta neta sell out · ${SO.sku.length} SKU con rotación</p>` +
+    tbl([{ t: 'Cód. Tottus', l: 1 }, { t: 'Producto', l: 1 }, { t: '', l: 1 }, { t: 'Venta' }, { t: 'Part.' }],
+      SO.sku.map(o => [cL(`<span class="mini n">${esc(o.c)}</span>`),
+      cL(`<span class="dot" style="background:${soCatColor(o.cat)}"></span>${esc(o.n)}`, 'name'),
+      barCell(o.v / maxS, soCatColor(o.cat)), cN(money(o.v)), cN(pct0(o.v / SO.neta * 100))]),
+      { foot: `<tr class="tot"><td>Total</td><td></td><td></td><td class="n">${money(SO.neta)}</td><td class="n">100,0%</td></tr>` }) + '</div>';
+
+  const maxL = Math.max(...SO.local.map(o => o[2]), 1);
+  const tLocal = `<div class="card"><h2>Venta por local</h2>
+    <p class="hint">Los ${SO.local.length} locales con venta en el período, por venta neta</p>` +
+    tbl([{ t: '#', l: 1 }, { t: 'Local', l: 1 }, { t: 'Cód.', l: 1 }, { t: '', l: 1 }, { t: 'Venta' }, { t: 'Part.' }],
+      SO.local.map((o, ix) => [cL(String(ix + 1), 'n'), cL(esc(o[1])), cL(`<span class="mini n">${esc(o[0])}</span>`),
+      barCell(o[2] / maxL, 'var(--ceruleo)'), cN(money(o[2])), cN(pct0(o[2] / SO.neta * 100))]),
+      { foot: `<tr class="tot"><td>Total</td><td></td><td></td><td></td><td class="n">${money(SO.neta)}</td><td class="n">100,0%</td></tr>` }) + '</div>';
+
+  document.getElementById('p-sellout').innerHTML = head + kpis +
+    `<div class="grid g23">${avance}${stock}</div>` +
+    `<div class="grid g23">${tSku}${flujo}</div>` + tLocal;
+}
+
+function flow(lab, v, sub, color, max) {
+  const w = max > 0 ? Math.max(4, v / max * 100) : 0;
+  return `<div>
+    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+      <span style="font-size:11.5px;font-weight:600">${esc(lab)}</span>
+      <span class="num" style="margin-left:auto;font-size:16px;font-weight:700">${money(v)}</span></div>
+    <div style="height:14px;border-radius:4px;background:var(--soft);margin:5px 0 3px;overflow:hidden">
+      <div style="height:100%;width:${w.toFixed(1)}%;background:${color};border-radius:4px" title="${esc(lab)}: ${esc(money0(v))}"></div></div>
+    <div class="mini">${esc(sub)}</div></div>`;
+}
+
+/* ============ 7 · ROTACIÓN Y STOCK ============ */
+/* El stock es la última existencia registrada por SKU en la base, no una serie histórica,
+   así que esta pestaña tampoco responde a los filtros de canal y zona. */
+const PSTK = RAW.ps || [], PCST = RAW.px || [];
+const CUTDI = Math.round((Date.parse(RAW.cut + 'T00:00:00Z') - BASE) / 86400000);
+const PERIODOS = [
+  { k: '12m', lab: 'Últimos 12 meses', dias: 365 },
+  { k: '6m', lab: 'Últimos 6 meses', dias: 182 },
+  { k: '3m', lab: 'Últimos 3 meses', dias: 91 },
+  { k: 'y', lab: `Año ${CY}`, dias: null }
+];
+let PER = '12m';
+
+const mesLab = k => MESL[k % 12][0].toUpperCase() + MESL[k % 12].slice(1) + ' ' + Math.floor(k / 12);
+
+/* test  = lo vendido dentro del período (el numerador de la rotación)
+   desde = lo vendido entre el inicio del período y la fecha de corte; sumado al stock
+           actual reconstruye el stock inicial de ese período. En las ventanas que
+           terminan hoy ambos coinciden; en un mes pasado, no. */
+function perInfo() {
+  if (PER.indexOf('m:') === 0) {
+    const k = +PER.slice(2), y = Math.floor(k / 12), m = k % 12;
+    const d0 = Math.round((Date.UTC(y, m, 1) - BASE) / 86400000);
+    return { p: { k: PER, lab: mesLab(k), mes: true },
+      test: i => R.y[i] === y && R.m[i] === m, desde: i => R.di[i] >= d0 };
+  }
+  const p = PERIODOS.find(x => x.k === PER) || PERIODOS[0];
+  if (p.dias) { const t = i => R.di[i] > CUTDI - p.dias; return { p, test: t, desde: t }; }
+  const t = i => R.y[i] === CY;
+  return { p, test: t, desde: t };
+}
+
+/* unidades vendidas por SKU en el período, sin filtros de canal ni zona */
+function unidadesPeriodo(test) {
+  const u = new Float64Array(PN.length);
+  for (let i = 0; i < N; i++) if (test(i)) u[R.p[i]] += R.u[i];
+  return u;
+}
+
+function renderRotacion() {
+  const sel = `<div class="card" style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:14px">
+    <div><h2 style="margin:0">Rotación y stock</h2>
+      <p class="hint" style="margin:2px 0 0">Cuánto de lo que había disponible se vendió. Stock inicial = stock actual + vendido en el período.</p></div>
+    <div class="fld" style="margin-left:auto"><label for="perSel">Período</label><select id="perSel">
+      <optgroup label="Acumulado">${PERIODOS.map(p => `<option value="${p.k}" ${p.k === PER ? 'selected' : ''}>${esc(p.lab)}</option>`).join('')}</optgroup>
+      <optgroup label="Mes">${ALLM.slice().reverse().map(k => `<option value="m:${k}" ${PER === 'm:' + k ? 'selected' : ''}>${esc(mesLab(k))}</option>`).join('')}</optgroup>
+    </select></div></div>`;
+  document.getElementById('p-rotacion').innerHTML = sel + '<div id="rotBody"></div>';
+  document.getElementById('perSel').onchange = e => { PER = e.target.value; drawRotacion(); };
+  drawRotacion();
+}
+
+function drawRotacion() {
+  const { p, test, desde } = perInfo();
+  const u = unidadesPeriodo(test);
+  const ud = p.mes ? unidadesPeriodo(desde) : u;   // base del stock inicial
+  const u12 = unidadesPeriodo(i => R.di[i] > CUTDI - 365);   // ritmo anual, inmune a la temporada
+  const cobDe = (st, j) => { const r = Math.max(0, u12[j]) / 12; return r > 0 ? st / r : null; };
+
+  const sku = [];
+  for (let j = 0; j < PN.length; j++) {
+    const st = PSTK[j] || 0, v = Math.max(0, u[j]), ini = st + Math.max(0, ud[j]);
+    if (!ini) continue;
+    sku.push({ j, cat: PC[j], st, v, ini, rot: ini > 0 ? v / ini * 100 : 0,
+      cob: cobDe(st, j), u12: Math.max(0, u12[j]), val: st * (PCST[j] || 0) });
+  }
+  const T = sku.reduce((a, o) => ({ st: a.st + o.st, v: a.v + o.v, ini: a.ini + o.ini, val: a.val + o.val }), { st: 0, v: 0, ini: 0, val: 0 });
+  const Tini = T.ini, rotT = Tini ? T.v / Tini * 100 : 0;
+  let T12 = 0; for (let j = 0; j < PN.length; j++) T12 += Math.max(0, u12[j]);
+  const cobT = T12 > 0 ? T.st / (T12 / 12) : null;
+
+  const kpis = `<div class="grid g4">
+    ${kpi('Stock actual', nf(T.st) + ' <small>un</small>', `<span>${money(T.val)} a costo${p.mes ? ' · hoy' : ''}</span>`, 'var(--ceruleo)')}
+    ${kpi(p.mes ? 'Vendido en el mes' : 'Vendido en el período', nf(Math.round(T.v)) + ' <small>un</small>', `<span>${esc(p.lab.toLowerCase())}</span>`, 'var(--magenta)')}
+    ${kpi('Rotación', pct0(rotT), `<span>de un stock inicial de ${nf(Math.round(Tini))} un</span>`, rotT >= 50 ? 'var(--verde)' : 'var(--naranja)')}
+    ${kpi('Cobertura', cobT === null ? '—' : nf(cobT, 1) + ' <small>meses</small>', `<span>al ritmo de los últimos 12 meses</span>`, cobT !== null && cobT > 12 ? 'var(--naranja)' : 'var(--violeta)')}
+  </div>`;
+
+  /* por categoría */
+  const cats = CAT.map((c, ci) => {
+    const r = sku.filter(o => o.cat === ci);
+    if (!r.length) return null;
+    const st = r.reduce((a, o) => a + o.st, 0), v = r.reduce((a, o) => a + o.v, 0),
+      val = r.reduce((a, o) => a + o.val, 0), ini = r.reduce((a, o) => a + o.ini, 0);
+    let a12 = 0; for (let j = 0; j < PN.length; j++) if (PC[j] === ci) a12 += Math.max(0, u12[j]);
+    return { ci, lab: c, st, v, ini, val, sku: r.length, rot: ini ? v / ini * 100 : 0, cob: a12 > 0 ? st / (a12 / 12) : null };
+  }).filter(Boolean).sort((a, b) => b.ini - a.ini);
+
+  const graf = `<div class="card"><div class="chead"><div><h2>Rotación sobre el stock inicial</h2>
+    <p class="hint">Cada barra es el stock inicial de la categoría${p.mes ? ' al empezar ' + p.lab.toLowerCase() : ''}: la parte sólida se vendió, la clara quedó.</p></div>
+    <div class="legend" style="margin-left:auto"><span>color sólido = vendido</span><span><i style="background:#D8DEE6"></i>gris = sigue en stock</span></div></div>
+    ${rotBars(cats)}`;
+
+  const tCat = `<div style="margin-top:16px;border-top:1px solid var(--line);padding-top:12px">` +
+    tbl([{ t: 'Categoría', l: 1 }, { t: 'SKU' }, { t: 'Stock inicial' }, { t: 'Vendido' }, { t: 'Stock actual' }, { t: 'Rotación' }, { t: 'Cobertura (meses)' }, { t: 'Valor stock' }],
+      cats.map(o => [cL(`<span class="dot" style="background:${catColor(o.ci)}"></span>${esc(o.lab)}`),
+      cN(nf(o.sku)), cN(nf(Math.round(o.ini))), cN(nf(Math.round(o.v))), cN(nf(o.st)),
+      cN(`<span class="chip ${o.rot >= 50 ? 'up' : o.rot >= 25 ? 'nt' : 'dn'}">${pct0(o.rot)}</span>`),
+      cN(o.cob === null ? '<span class="mini">—</span>' : nf(o.cob, 1)), cN(money(o.val))]),
+      { foot: `<tr class="tot"><td>Total</td><td class="n">${nf(sku.length)}</td><td class="n">${nf(Math.round(Tini))}</td>
+        <td class="n">${nf(Math.round(T.v))}</td><td class="n">${nf(T.st)}</td><td class="n">${pct0(rotT)}</td>
+        <td class="n">${cobT === null ? '—' : nf(cobT, 1)}</td><td class="n">${money(T.val)}</td></tr>` }) + '</div></div>';
+
+  /* stock que no se mueve: mayor valor con rotación baja */
+  const lento = sku.filter(o => o.st > 0 && o.rot < 25).sort((a, b) => b.val - a.val).slice(0, 12);
+  const tLento = `<div class="card"><h2>Stock que no rota</h2>
+    <p class="hint">SKU con menos de 25% de rotación en el período, por valor inmovilizado</p>` +
+    (lento.length ? tbl([{ t: 'Producto', l: 1 }, { t: 'Stock' }, { t: 'Vendido' }, { t: 'Rot.' }, { t: 'Cob. meses' }, { t: 'Valor' }],
+      lento.map(o => [cL(`<span class="dot" style="background:${catColor(o.cat)}"></span>${esc(PN[o.j])}`, 'name'),
+      cN(nf(o.st)), cN(nf(Math.round(o.v))), cN(`<span class="chip dn">${pct0(o.rot)}</span>`),
+      cN(o.cob === null ? '<span class="mini">sin venta</span>' : nf(o.cob, 0)), cN(money(o.val))]))
+      : '<p class="empty">Todo el catálogo rota sobre el 25% en el período.</p>') + '</div>';
+
+  const orden = sku.slice().sort((a, b) => b.val - a.val);
+  const tSku = `<div class="card"><h2>Rotación por SKU</h2><p class="hint">${esc(p.lab)} · ordenado por valor de stock</p>` +
+    tbl([{ t: '#', l: 1 }, { t: 'Producto', l: 1 }, { t: 'Categoría', l: 1 }, { t: 'Stock inicial' }, { t: 'Vendido' }, { t: 'Stock actual' }, { t: 'Rotación' }, { t: 'Cobertura (meses)' }, { t: 'Valor stock' }],
+      orden.map((o, ix) => [cL(String(ix + 1), 'n'), cL(esc(PN[o.j]), 'name'),
+      cL(`<span class="dot" style="background:${catColor(o.cat)}"></span><span class="mini">${esc(CAT[o.cat])}</span>`),
+      cN(nf(Math.round(o.ini))), cN(nf(Math.round(o.v))), cN(nf(o.st)),
+      cN(`<span class="chip ${o.rot >= 50 ? 'up' : o.rot >= 25 ? 'nt' : 'dn'}">${pct0(o.rot)}</span>`),
+      cN(o.cob === null ? '<span class="mini">—</span>' : nf(o.cob, o.cob >= 10 ? 0 : 1)), cN(money(o.val))])) + '</div>';
+
+  document.getElementById('rotBody').innerHTML = kpis + graf + tCat + `</div>` + tLento + tSku;
+}
+
+function rotBars(cats) {
+  if (!cats.length) return '<p class="empty">Sin datos en el período.</p>';
+  const W = 1000, rowH = 30, gap = 18, lw = 150, padR = 150;
+  const iw = W - lw - padR, H = cats.length * (rowH + gap);
+  const max = Math.max(...cats.map(o => o.ini), 1);
+  let s = '';
+  cats.forEach((o, ri) => {
+    const y = ri * (rowH + gap), bw = Math.max(2, o.ini / max * iw), vw = o.ini ? bw * (o.v / o.ini) : 0;
+    const col = catColor(o.ci);
+    s += `<text x="0" y="${y + rowH / 2 + 4}" font-size="11.5" font-weight="600" fill="var(--ink)">${esc(o.lab)}</text>`;
+    s += `<rect x="${lw}" y="${y}" width="${bw}" height="${rowH}" rx="4" fill="#D8DEE6">${T(`${o.lab}: ${nf(o.st)} un en stock de un inicial de ${nf(Math.round(o.ini))}`)}</rect>`;
+    if (vw > 0) s += `<rect x="${lw}" y="${y}" width="${vw}" height="${rowH}" rx="4" fill="${col}">${T(`${o.lab}: ${nf(Math.round(o.v))} un vendidas · ${pct0(o.rot)} del stock inicial`)}</rect>`;
+    if (vw > 52) s += `<text x="${lw + vw - 9}" y="${y + rowH / 2 + 4}" font-size="10.5" font-weight="700" fill="#fff" text-anchor="end" class="n" pointer-events="none">${esc(pct0(o.rot, 0))}</text>`;
+    else s += `<text x="${lw + vw + 7}" y="${y + rowH / 2 + 4}" font-size="10.5" font-weight="700" fill="${col}" class="n" pointer-events="none">${esc(pct0(o.rot, 1))}</text>`;
+    s += `<text x="${lw + bw + 12}" y="${y + rowH / 2 - 1}" font-size="11.5" font-weight="700" fill="var(--ink)" class="n">${esc(nf(Math.round(o.ini)))} un</text>`;
+    s += `<text x="${lw + bw + 12}" y="${y + rowH / 2 + 12}" font-size="9.5" fill="var(--muted)" class="n">${esc(nf(o.st) + ' en stock')}</text>`;
+  });
+  return SVG(`0 0 ${W} ${H}`, s);
+}
+
+/* ============ init ============ */
+const TABS = { resumen: renderResumen, ventas: renderVentas, productos: renderProductos, clientes: renderClientes, cierre: renderCierre, sellout: renderSellout, rotacion: renderRotacion };
+let TAB = 'resumen';
+function renderAll() { applyFilter(); Object.keys(TABS).forEach(t => TABS[t]()); }
+function boot() {
+  const cl = document.getElementById('cutLabel');
+  cl.textContent = 'Datos al ' + nf(CD) + ' de ' + MESL[CM] + ' de ' + CY;
+  const fc = document.getElementById('fCanal'), fz = document.getElementById('fZona');
+  fc.innerHTML = '<option value="-1">Todos los canales</option>' + CAN.map((c, i) => `<option value="${i}">${esc(c)}</option>`).join('');
+  fz.innerHTML = '<option value="-1">Todas las zonas</option>' + ZON.map((c, i) => `<option value="${i}">${esc(c)}</option>`).join('');
+  fc.onchange = e => { F.canal = +e.target.value; renderAll(); };
+  fz.onchange = e => { F.zona = +e.target.value; renderAll(); };
+  const nav = document.getElementById('tabs');
+  nav.onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    TAB = b.dataset.t;
+    [...nav.children].forEach(x => x.classList.toggle('on', x === b));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + TAB));
+    lockFilters(TAB === 'sellout' || TAB === 'rotacion');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  renderAll();
+}
+/* el sell out viene de Tottus, no de la facturación: los filtros no lo recalculan */
+function lockFilters(off) {
+  [['fCanal', 'canal'], ['fZona', 'zona']].forEach(([id]) => {
+    const el = document.getElementById(id); if (!el) return;
+    el.disabled = off;
+    el.title = off ? 'Esta vista no se filtra por canal ni zona' : '';
+    el.parentElement.classList.toggle('off', off);
+  });
+}
+boot();
+
+
+</script>
+</body>
+</html>
